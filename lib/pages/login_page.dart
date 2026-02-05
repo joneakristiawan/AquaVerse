@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart'; 
-import 'home_page.dart';  
+import 'display_page.dart';
 import 'register_page.dart'; 
 
 class LoginPage extends StatefulWidget {
@@ -37,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       if (response.user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
+          MaterialPageRoute(builder: (_) => const DisplayPage()),
         );
       }
       } catch (e) {

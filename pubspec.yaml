@@ -28,5 +28,5 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "AquaVerse/assetslocal/logopict/logo.png"
+  image_path: "AquaVerse/assetslocal/logo.png"
 

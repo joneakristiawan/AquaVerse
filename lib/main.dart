@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/login_page.dart';
 import 'pages/display_page.dart';
 import 'dbkey/dbkey.dart';
-// import 'splash_screen.dart'; 
+import 'pages/splash_screen.dart'; 
 
 
 Future<void> main() async{ 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false, 
-      home: const DisplayPage()
+      home: const SplashScreen()
     ); 
   }
 }

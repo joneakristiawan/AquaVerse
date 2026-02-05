@@ -24,8 +24,6 @@ Major Push
     - news_page.dart
     - profile_page.dart
 
-3. Changed code on main.dart from "home:SplashScreen()" to "home:DisplayPage" to avoid errors
+3. Added commands on pubspec.yaml to change Flutter's default app icon
 
-4. Added commands on pubspec.yaml to change Flutter's default app icon
-
-5. Changed app name on AndroidManifest.xml to "AquaVerse"
+4. Changed app name on AndroidManifest.xml to "AquaVerse"

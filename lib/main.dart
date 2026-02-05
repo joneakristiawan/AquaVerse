@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'pages/login_page.dart';
-import 'pages/display_page.dart';
 import 'dbkey/dbkey.dart';
 import 'pages/splash_screen.dart'; 
 

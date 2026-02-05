@@ -40,7 +40,7 @@ Jika ada penambahan penamaan, mohon dicantumkan dalam NOTES!
 */
 
 import '../../pages/dive_page.dart';
-import '../../pages/game_page.dart';
+import 'quiz_page.dart';
 import '../../pages/home_page.dart';
 import '../../pages/news_page.dart';
 import '../../pages/profile_page.dart';
@@ -73,7 +73,7 @@ class _DisplayPageState extends State<DisplayPage> {
     ),
     const NewsPage(),
     const DivePage(),
-    const GamePage(),
+    const QuizPage(),
     const ProfilePage()
   ];
   

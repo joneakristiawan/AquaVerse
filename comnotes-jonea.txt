@@ -27,3 +27,5 @@ Major Push
 3. Added commands on pubspec.yaml to change Flutter's default app icon
 
 4. Changed app name on AndroidManifest.xml to "AquaVerse"
+
+5. Moving all pages file to "pages" folder

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dbkey/dbkey.dart';
 import 'pages/splash_screen.dart'; 
-
+import 'pages/display_page.dart'; 
+import 'pages/login_page.dart'; 
+import 'pages/quiz_page.dart'; 
+import 'pages/quiz_fill.dart'; 
 
 Future<void> main() async{ 
   WidgetsFlutterBinding.ensureInitialized(); 
@@ -23,7 +26,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false, 
-      home: const SplashScreen()
+      home: const QuizFill()
     ); 
   }
 }

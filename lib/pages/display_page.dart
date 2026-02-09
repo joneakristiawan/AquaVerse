@@ -107,8 +107,6 @@ class _DisplayPageState extends State<DisplayPage> {
               onTabChange: (index) => navigateBottomBar(index),
               selectedIndex: _selectedIndex,
             ),
-
-      
     );
   }
 }

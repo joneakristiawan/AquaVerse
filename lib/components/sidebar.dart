@@ -44,7 +44,7 @@ class SideMenu extends StatelessWidget {
           // List Menu (Langsung aja jejerin di sini)
           _buildItem(context, 0, "Home", Icons.home),
           _buildItem(context, 1, "News", Icons.newspaper),
-          _buildItem(context, 2, "Fish", FontAwesomeIcons.fishFins, isFa: true),
+          _buildItem(context, 2, "Dive", FontAwesomeIcons.fishFins, isFa: true),
           _buildItem(context, 3, "Game", FontAwesomeIcons.gamepad, isFa: true),
           _buildItem(context, 4, "Profile", Icons.person),
           

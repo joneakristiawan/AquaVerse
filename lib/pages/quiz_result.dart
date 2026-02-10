@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'quiz_page.dart'; 
 
 class QuizResult extends StatelessWidget {

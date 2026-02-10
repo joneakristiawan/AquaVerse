@@ -144,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
           Align(
             alignment: Alignment.bottomCenter, 
             child: Container(
-              height: 650, 
+              height: 550, 
               width: double.infinity,
               color: Colors.white, 
               child: Padding(

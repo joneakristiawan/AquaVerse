@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, avoid_print
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,7 +15,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String userName = "Diver"; 
+  String userName = "Diver";
+
+  int _streak = 0;
+  int _explored = 0;
+  double _dailych = 0.0;
   
   late Future<List<News>> _newsFuture = fetchNews();
 
@@ -28,7 +34,33 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _getUserInfo(); 
+    _getUserProgress();
     _startAutoScroll();
+  }
+
+  Future<void> _getUserProgress() async {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    if (user != null) {
+      try{
+        final response = await Supabase.instance.client
+            .from('user_progress')
+            .select('streak, explored, dailych')
+            .eq('id', user.id)
+            .single();
+
+        if (mounted){
+          setState(() {
+            _streak = response['streak'] ?? 0;
+            _explored = response['explored'] ?? 0;
+            _dailych = (response['dailych'] ?? 0).toDouble();
+          });
+        }
+      } catch (e){
+        print('Error fetching user progress: $e');
+      }
+    }
+    
   }
 
   void _getUserInfo() {
@@ -115,6 +147,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFFFFFFFF),
       body: Stack(
         children: [
@@ -136,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(24, 50, 24, 24),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 225, 251, 254),
+                        color: const Color.fromARGB(255, 255, 255, 255),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(35),
                           bottomRight: Radius.circular(-35),
@@ -160,14 +194,14 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               const CircleAvatar(
                                 radius: 30,
-                                backgroundColor: Color.fromARGB(255, 253, 203, 255),
+                                backgroundColor: Color.fromARGB(255, 155, 155, 155),
                                 child: CircleAvatar(
                                   radius: 26,
-                                  backgroundColor: Color.fromARGB(255, 253, 228, 254),
+                                  backgroundColor: Color.fromARGB(255, 223, 223, 223),
                                   child: Icon(
                                     Icons.person,
                                     size: 30,
-                                    color: Color.fromARGB(255, 199, 136, 255),
+                                    color: Color.fromARGB(255, 93, 93, 93),
                                   ),
                                 ),
                               ),
@@ -188,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                                     'Divers',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Color.fromARGB(255, 120, 120, 120),
+                                      color: Color.fromARGB(255, 255, 255, 255),
                                     ),
                                   ),
                                 ],
@@ -213,25 +247,25 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: const [
+                              children: [
                                 Column(
                                   children: [
-                                    Icon(Icons.waves, color: Color.fromARGB(255, 3, 112, 255), size: 30),
-                                    SizedBox(height: 4),
-                                    Text('5 Days', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                    Text('Sails Streak', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
+                                    const Icon(Icons.waves, color: Color.fromARGB(255, 3, 112, 255), size: 30),
+                                    const SizedBox(height: 4),
+                                    Text('$_streak Days', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                    const Text('Sails Streak', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 50,
                                   child: VerticalDivider(color: Colors.grey),
                                 ),
                                 Column(
                                   children: [
-                                    Icon(Icons.sailing_sharp, color: Color.fromARGB(255, 3, 112, 255), size: 30),
-                                    SizedBox(height: 4),
-                                    Text('12%', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                    Text('Explored', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
+                                    const Icon(Icons.sailing_sharp, color: Color.fromARGB(255, 3, 112, 255), size: 30),
+                                    const SizedBox(height: 4),
+                                    Text('$_explored%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                    const Text('Explored', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
                                   ],
                                 ),
                               ],
@@ -248,8 +282,12 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            "Latest News",
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            "LATEST NEWS",
+                            style: TextStyle(
+                              fontFamily: "Montserrat",
+                              fontSize: 24, 
+                              fontWeight: FontWeight.bold),
+                              
                           ),
                           
                           TextButton(
@@ -341,13 +379,70 @@ class _HomePageState extends State<HomePage> {
                     ),
 
                     Container(
-                      height: 100,
+                      height: 110,
                       margin: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: const Color.fromARGB(255, 156, 216, 250),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Center(child: Text("Coming Soon!")),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.book,
+                              size: 50,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Your Progress",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                
+                                ClipRRect(
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                                  child: LinearProgressIndicator(
+                                    value: _dailych / 100,
+                                    minHeight: 8,
+                                    backgroundColor: Color.fromARGB(255, 204, 229, 243),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Color.fromARGB(255, 22, 114, 227),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+
+                                Text(
+                                  "Read 5 news articles to complete this challenge.",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                ),
+                              ],
+                            )
+                          )
+                        ],
+                      ),
                     ),
 
                     const Padding(

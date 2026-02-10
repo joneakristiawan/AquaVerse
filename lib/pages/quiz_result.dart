@@ -1,8 +1,6 @@
-import 'package:aqua_verse/pages/quiz_fill.dart';
 import 'package:flutter/material.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart'; 
-import 'quiz_page.dart'; 
-import 'display_page.dart'; 
+import 'quiz_fill.dart'; 
 
 class QuizResult extends StatelessWidget {
   final int totalQuestions;

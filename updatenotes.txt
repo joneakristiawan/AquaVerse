@@ -1,7 +1,0 @@
-========Minor Push========
-
-1. Update on login page:
-    - Users can login with username
-2. Update card on home page
-3. Removed unused import page on main.dart
-4. Removed unused import page on register_page.dart

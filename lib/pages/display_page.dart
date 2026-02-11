@@ -107,8 +107,62 @@ class _DisplayPageState extends State<DisplayPage> {
               onTabChange: (index) => navigateBottomBar(index),
               selectedIndex: _selectedIndex,
             ),
+    );
+  }
+}
 
-      
+class DisplayPageWithQuizSelected extends StatelessWidget {
+  const DisplayPageWithQuizSelected({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DisplayPageInitialIndex(selectedIndex: 3);
+  }
+}
+
+class DisplayPageInitialIndex extends StatefulWidget {
+  final int selectedIndex;
+  const DisplayPageInitialIndex({super.key, required this.selectedIndex});
+
+  @override
+  State<DisplayPageInitialIndex> createState() => _DisplayPageInitialIndexState();
+}
+
+class _DisplayPageInitialIndexState extends State<DisplayPageInitialIndex> {
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+  }
+
+  void navigateBottomBar(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  List<Widget> get _pages => [
+    HomePage(onTabChange: (index) => navigateBottomBar(index)),
+    const NewsPage(),
+    const DivePage(),
+    const QuizPage(),
+    const ProfilePage(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: Navbar(
+        onTabChange: (index) => navigateBottomBar(index),
+        selectedIndex: _selectedIndex,
+      ),
+      drawer: SideMenu(
+        onTabChange: (index) => navigateBottomBar(index),
+        selectedIndex: _selectedIndex,
+      ),
     );
   }
 }

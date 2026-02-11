@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; 
+import 'quiz_fill.dart'; 
+
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -15,6 +16,8 @@ class _QuizPageState extends State<QuizPage> {
   late final String aquaVerseLogoUrl;
   late final String quizLogoUrl; 
   late final String coinsUrl; 
+  late final String startQuizBgPicUrl; 
+  late final String playButtonUrl; 
 
   late final Future<Map<String, dynamic>> userFuture;
 
@@ -35,6 +38,14 @@ class _QuizPageState extends State<QuizPage> {
     coinsUrl = supabase.storage
       .from('aquaverse')
       .getPublicUrl('assets/images/quiz/Coins.png'); 
+
+    startQuizBgPicUrl = supabase.storage
+      .from('aquaverse')
+      .getPublicUrl('assets/images/quiz/Quiz_Background.jpg'); 
+
+    playButtonUrl = supabase.storage
+      .from('aquaverse')
+      .getPublicUrl('assets/images/quiz/PlayButton.png'); 
   }
 
   Future<Map<String, dynamic>> fetchUserData() async {
@@ -217,29 +228,16 @@ class _QuizPageState extends State<QuizPage> {
 
                         const SizedBox(height: 15,), 
 
-                        MulaiKuis(), 
+                        MulaiKuis(
+                          startQuizBgPicUrl: startQuizBgPicUrl, 
+                          playButtonUrl: playButtonUrl
+                        ), 
 
                       ],
                     ),
                   ),
                 ),
               ),
-
-              // SafeArea(
-              //   child: Padding(
-              //     padding: EdgeInsets.only(top:600), 
-              //     child: SingleChildScrollView(
-              //       child: Padding(
-              //         padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
-              //         child: Container(
-              //           width: 200, 
-              //           height: 1500,
-              //           color: Colors.red,
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // )
 
             ],
           );
@@ -339,7 +337,7 @@ class ProfilPrestasi extends StatelessWidget {
                 Text(
                   "Profil Prestasi",
                   style: TextStyle(
-                    fontSize: 25,
+                    fontSize: 24,
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.bold,
                     color:
@@ -394,7 +392,7 @@ class ProfilPrestasi extends StatelessWidget {
                           ),
                           child: Text('USN: $username',
                             style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 15,
                                 )),
                         ), 
                         const SizedBox(height: 1,), 
@@ -531,7 +529,14 @@ class TingkatkanPoin extends StatelessWidget {
 }
 
 class MulaiKuis extends StatelessWidget {
-  const MulaiKuis({super.key}); 
+  final String startQuizBgPicUrl; 
+  final String playButtonUrl; 
+
+  const MulaiKuis({
+    super.key, 
+    required this.startQuizBgPicUrl, 
+    required this.playButtonUrl
+  }); 
 
   @override
   Widget build(BuildContext context) {
@@ -539,8 +544,75 @@ class MulaiKuis extends StatelessWidget {
       padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
       child: Container(
         width: double.infinity, 
-        height: 1500,
-        color: Colors.red,
+        height: 250,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10), 
+          image: DecorationImage(
+            image: NetworkImage(startQuizBgPicUrl),  
+            fit: BoxFit.cover
+          )
+        ),
+
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 30),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QuizFill(),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 72,
+                  width: 227,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                    child: Container(
+                      height: 55,
+                      width: 210,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(148, 214, 245, 1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.network(
+                            playButtonUrl,
+                            height: 35,
+                            width: 35,
+                          ),
+                          const SizedBox(width: 10),
+                          const Text(
+                            "MULAI",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontFamily: "Montserrat",
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(63, 68, 102, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+
       ),
     ); 
   }

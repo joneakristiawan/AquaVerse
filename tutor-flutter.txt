@@ -11,3 +11,4 @@ di pubspec.yaml
 
 buat folder assets/images, terus isi image di dalam 
 jalanin flutter pub get 
+

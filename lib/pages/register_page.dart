@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart'; 
-import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key}); 
@@ -162,7 +161,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       const SizedBox(height: 10,), 
                       const Text('Daftarkan AquaAccount sekarang. Jelajahi dan bongkar rahasia paling gelap dalam laut dalam!', 
                         style: TextStyle(
-                          fontSize: 14, 
+                          fontSize: 15, 
                           color: Color.fromRGBO(45, 45, 45, 1)
                         ),
                       ),
@@ -248,7 +247,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           child: Text(
                             'Daftarkan', 
                             style: TextStyle(
-                              fontSize: 16, 
+                              fontSize: 15, 
                               color: Colors.black
                             ),
                           ),

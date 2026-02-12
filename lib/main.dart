@@ -1,13 +1,13 @@
-import 'package:aquaverse/pages/register_page.dart';
+// import 'package:aquaverse/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dbkey/dbkey.dart';
 import 'pages/splash_screen.dart';
-import 'pages/display_page.dart';
-import 'pages/login_page.dart';
-import 'pages/quiz_page.dart';
-import 'pages/quiz_fill.dart';
-import 'pages/quiz_result.dart';
+// import 'pages/display_page.dart';
+// import 'pages/login_page.dart';
+// import 'pages/quiz_page.dart';
+// import 'pages/quiz_fill.dart';
+// import 'pages/quiz_result.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

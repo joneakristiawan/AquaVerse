@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, avoid_print
+// ignore_for_file: deprecated_member_use, avoid_print, use_build_context_synchronously
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -17,9 +17,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String userName = "Diver";
 
+  // Progress Statis
   int _streak = 0;
-  int _explored = 0;
+  int _points = 0;
   double _dailych = 0.0;
+
+  // --- LOGIC RANK BARU ---
+  String _nextRankMessage = "Memuat data...";
+  String? _nextBadgeUrl;
+  // -----------------------
   
   late Future<List<News>> _newsFuture = fetchNews();
 
@@ -34,34 +40,128 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _getUserInfo(); 
-    // _getUserProgress(); 
+    _getUserProgress(); // Logic Streak & Rank jalan di sini
     _startAutoScroll();
   }
 
-  // Future<void> _getUserProgress() async {
-  //   final user = Supabase.instance.client.auth.currentUser;
+  /// FUNGSI UTAMA: Update Streak & Ambil Data Rank
+  Future<void> _getUserProgress() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    final supabase = Supabase.instance.client;
 
-  //   if (user != null) {
-  //     try{
-  //       final response = await Supabase.instance.client
-  //           .from('user_progress')
-  //           .select('streak, explored, dailych')
-  //           .eq('id', user.id)
-  //           .single();
+    if (user != null) {
+      try {
+        // 1. Ambil data progress user (termasuk tanggal terakhir login)
+        final progressResponse = await supabase
+            .from('user_progress')
+            .select('streak, points, dailych, last_active_date')
+            .eq('id', user.id)
+            .single();
 
-  //       if (mounted){
-  //         setState(() {
-  //           _streak = response['streak'] ?? 0;
-  //           _explored = response['explored'] ?? 0;
-  //           _dailych = (response['dailych'] ?? 0).toDouble();
-  //         });
-  //       }
-  //     } catch (e){
-  //       print('Error fetching user progress: $e');
-  //     }
-  //   }
-    
-  // }
+        // --- LOGIC HITUNG STREAK (START) ---
+        int currentStreak = progressResponse['streak'] ?? 0;
+        String? lastDateString = progressResponse['last_active_date']; // Format: YYYY-MM-DD
+        
+        // Ambil tanggal hari ini (tanpa jam/menit)
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+        final todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+        
+        bool needUpdate = false;
+
+        if (lastDateString == null) {
+          // Kasus 1: User baru pertama kali login seumur hidup / data tanggal kosong
+          currentStreak = 1;
+          needUpdate = true;
+        } else {
+          // Parse tanggal dari database
+          final lastDate = DateTime.parse(lastDateString);
+          
+          // Hitung selisih hari (Hari ini - Tanggal Terakhir)
+          final difference = today.difference(lastDate).inDays;
+
+          if (difference == 0) {
+            // Kasus 2: Login di hari yang sama -> Gak usah diapa-apain
+          } else if (difference == 1) {
+            // Kasus 3: Login besoknya (Berurutan) -> Streak Nambah!
+            currentStreak += 1;
+            needUpdate = true;
+          } else if (difference > 1) {
+            // Kasus 4: Bolong lebih dari sehari -> RESET jadi 1
+            currentStreak = 1;
+            needUpdate = true;
+          }
+          // Note: Kalo difference negatif (user ganti tanggal HP mundur), kita abaikan biar gak error
+        }
+
+        // Simpan perubahan streak ke Database kalo ada update
+        if (needUpdate) {
+          await supabase.from('user_progress').update({
+            'streak': currentStreak,
+            'last_active_date': todayStr, // Update jadi tanggal hari ini
+          }).eq('id', user.id);
+        }
+        // --- LOGIC HITUNG STREAK (END) ---
+
+        // 2. Ambil data Rank Detail (Buat widget Next Rank)
+        final rankResponse = await supabase
+            .from('profiles')
+            .select('''
+              user_rank (
+                points, 
+                ranks (
+                  id,
+                  name,
+                  max_points
+                )
+              )
+            ''')
+            .eq('id', user.id)
+            .single();
+
+        if (mounted) {
+          setState(() {
+            // Update UI dengan data terbaru
+            _streak = currentStreak; 
+            _points = progressResponse['points'] ?? 0;
+            _dailych = (progressResponse['dailych'] ?? 0).toDouble();
+
+            // --- LOGIC TAMPILAN RANK ---
+            final userRank = rankResponse['user_rank'];
+            
+            if (userRank != null) {
+              final rankData = userRank['ranks'];
+              final int currentPoints = userRank['points'];
+              final int rankId = rankData['id'];
+              final String rankName = rankData['name'];
+              final int rankMaxPoint = rankData['max_points'];
+              
+              // Hitung sisa poin message
+              if (rankName == 'Ocean Sovereign' && rankId == 5) {
+                _nextRankMessage = 'Max Rank Tercapai!';
+              } else {
+                final int pointsNeeded = rankMaxPoint + 1 - currentPoints;
+                _nextRankMessage = 'Hanya dalam $pointsNeeded poin lagi!';
+              }
+
+              // Tentukan gambar Badge Selanjutnya
+              String nextRankImage;
+              if(rankId == 1) nextRankImage = 'rank_2_star_voyager.png';
+              else if(rankId == 2) nextRankImage = 'rank_3_apex_swimmer.png';
+              else if(rankId == 3) nextRankImage = 'rank_4_abyss_guardian.png';
+              else nextRankImage = 'rank_5_ocean_sovereign.png';
+
+              _nextBadgeUrl = supabase.storage
+                  .from('aquaverse')
+                  .getPublicUrl('assets/images/ranks/$nextRankImage');
+            }
+          });
+        }
+      } catch (e) {
+        print('Error fetching user progress: $e');
+      }
+    }
+  }
 
   void _getUserInfo() {
     final user = Supabase.instance.client.auth.currentUser;
@@ -134,6 +234,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _refreshData() async {
     _newsFuture = fetchNews();
+    _getUserProgress(); // Refresh progress juga pas tarik layar
     setState(() {});
   }
 
@@ -168,7 +269,8 @@ class _HomePageState extends State<HomePage> {
                     // ===== SECTION BASE PROFILE =====
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(24, 50, 24, 24),
+                      // Pake padding yang aman buat semua device (Responsive)
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 60, bottom: 24),
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 255, 255, 255),
                         borderRadius: const BorderRadius.only(
@@ -206,31 +308,40 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                               const SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Hi, $userName',
-                                    style: const TextStyle(
-                                      fontFamily: "Montserrat",
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 56, 56, 56),
+                              
+                              // Expanded agar text tidak overflow ke kanan
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // FittedBox bikin font mengecil otomatis kalo namanya kepanjangan
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        'Hi, $userName',
+                                        style: const TextStyle(
+                                          fontFamily: "Montserrat",
+                                          fontSize: 38,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(255, 56, 56, 56),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  const Text(
-                                    'Divers',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color.fromARGB(255, 255, 255, 255),
+                                    const Text(
+                                      'Divers',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 255, 255, 255),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 25),
+                          const SizedBox(height: 20),
 
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -245,30 +356,33 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ],
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Column(
-                                  children: [
-                                    const Icon(Icons.waves, color: Color.fromARGB(255, 3, 112, 255), size: 30),
-                                    const SizedBox(height: 4),
-                                    Text('$_streak Days', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                    const Text('Sails Streak', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 50,
-                                  child: VerticalDivider(color: Colors.grey),
-                                ),
-                                Column(
-                                  children: [
-                                    const Icon(Icons.sailing_sharp, color: Color.fromARGB(255, 3, 112, 255), size: 30),
-                                    const SizedBox(height: 4),
-                                    Text('$_explored%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                                    const Text('Explored', style: TextStyle(fontSize: 10, color: Color.fromARGB(255, 120, 120, 120))),
-                                  ],
-                                ),
-                              ],
+                            child: IntrinsicHeight(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        const Icon(Icons.sailing, color: Color.fromRGBO(10, 78, 236, 1), size: 40),
+                                        const SizedBox(height: 4),
+                                        Text('$_streak Days', style: const TextStyle(fontSize: 22, fontFamily: 'Montserrat', fontWeight: FontWeight.w600)),
+                                        const Text('Sails Streak', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
+                                      ],
+                                    ),
+                                  ),
+                                  const VerticalDivider(color: Colors.grey, thickness: 1),
+                                  Expanded(
+                                    child: Column(
+                                      children: [
+                                        const Icon(Icons.star, color: Color.fromRGBO(10, 78, 236, 1), size: 40),
+                                        const SizedBox(height: 4),
+                                        Text('$_points', style: const TextStyle(fontSize: 22, fontFamily: 'Montserrat', fontWeight: FontWeight.w700)),
+                                        const Text('Points', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -287,13 +401,11 @@ class _HomePageState extends State<HomePage> {
                               fontFamily: "Montserrat",
                               fontSize: 24, 
                               fontWeight: FontWeight.bold),
-                              
                           ),
-                          
                           TextButton(
                             onPressed: () {
                               if (widget.onTabChange != null) {
-                                widget.onTabChange!(1); // Navigate to News Page
+                                widget.onTabChange!(1); 
                               }
                             },
                             child: const Text(
@@ -307,18 +419,16 @@ class _HomePageState extends State<HomePage> {
 
                     // ===== SECTION LATEST NEWS CAROUSEL =====
                     SizedBox(
-                      height: 270,
+                      height: 270, 
                       child: FutureBuilder<List<News>>(
                         future: _newsFuture,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(child: CircularProgressIndicator());
                           }
-
                           if (snapshot.hasError) {
                             return const Center(child: Text("Failed to Fetch News"));
                           }
-
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
                             return const Center(child: Text("Belum ada berita terbaru"));
                           }
@@ -341,10 +451,7 @@ class _HomePageState extends State<HomePage> {
                                   },
                                 ),
                               ),
-
                               const SizedBox(height: 6),
-
-                              // DOT INDICATOR
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: List.generate(
@@ -379,11 +486,10 @@ class _HomePageState extends State<HomePage> {
                     ),
 
                     Container(
-                      height: 110,
                       margin: const EdgeInsets.all(14),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 156, 216, 250),
+                        color: const Color.fromRGBO(148, 215, 247, 1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -397,46 +503,48 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: const Icon(
                               Icons.book,
-                              size: 50,
+                              size: 40,
                               color: Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                           const SizedBox(width: 16),
 
-                          Expanded(
+                          Expanded( 
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
+                                const Text(
                                   "Your Progress",
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 18, 
                                     fontWeight: FontWeight.bold,
                                     color: Color.fromARGB(255, 0, 0, 0),
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
                                 
                                 ClipRRect(
-                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                                  borderRadius: const BorderRadius.all(Radius.circular(4)),
                                   child: LinearProgressIndicator(
                                     value: _dailych / 100,
                                     minHeight: 8,
-                                    backgroundColor: Color.fromARGB(255, 204, 229, 243),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                    backgroundColor: const Color.fromARGB(255, 204, 229, 243),
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
                                       Color.fromARGB(255, 22, 114, 227),
                                     ),
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                const SizedBox(height: 8),
 
-                                Text(
+                                const Text(
                                   "Read 5 news articles to complete this challenge.",
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Color.fromARGB(255, 0, 0, 0),
                                   ),
+                                  maxLines: 2, 
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             )
@@ -445,6 +553,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
+                    // ===== SECTION TUNGGU APA LAGI (LEVEL UP) =====
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 14),
                       child: Text(
@@ -453,15 +562,90 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    Container(
-                      height: 100,
-                      margin: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(12),
+                    // WIDGET LEVEL UP / RANK UP
+                    if (_nextBadgeUrl != null)
+                      Container(
+                        margin: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), 
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(148, 214, 245, 1),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              offset: const Offset(0, 4),
+                              blurRadius: 8,
+                            )
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Naikkan Rank!',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold,
+                                      color: Color.fromRGBO(63, 68, 102, 1),
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                    width: 150,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    _nextRankMessage,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontStyle: FontStyle.italic,
+                                      color: Color.fromARGB(255, 40, 40, 40),
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            // Badge Next Rank
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(_nextBadgeUrl!),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    else
+                      // Loading State
+                      Container(
+                        height: 90,
+                        margin: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
-                      child: const Center(child: Text("Coming Soon!")),
-                    ),
+
+                    const SizedBox(height: 40), // Spacer bawah
                   ],
                 ),
               ),

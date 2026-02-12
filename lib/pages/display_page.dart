@@ -71,7 +71,7 @@ class _DisplayPageState extends State<DisplayPage> {
     HomePage(
       onTabChange: (index) => navigateBottomBar(index),
     ),
-    const NewsPage(),
+    NewsPage(),
     const DivePage(),
     const QuizPage(),
     const ProfilePage()
@@ -145,7 +145,7 @@ class _DisplayPageInitialIndexState extends State<DisplayPageInitialIndex> {
 
   List<Widget> get _pages => [
     HomePage(onTabChange: (index) => navigateBottomBar(index)),
-    const NewsPage(),
+    NewsPage(),
     const DivePage(),
     const QuizPage(),
     const ProfilePage(),

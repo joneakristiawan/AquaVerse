@@ -2,6 +2,7 @@ class News {
   final String imageUrl;
   final String author;
   final String title;
+  final String category;
   final DateTime publishTime;
   final String content;
   final String userpicture;
@@ -10,6 +11,7 @@ class News {
     required this.imageUrl,
     required this.author,
     required this.title,
+    required this.category,
     required this.publishTime,
     required this.content,
     required this.userpicture,
@@ -37,6 +39,7 @@ class News {
       title: (json['title'] ?? 'No Title').toString(),
       author: (json['author'] ?? 'Admin').toString(),
       content: (json['content'] ?? '').toString(),
+      category: (json['category'] ?? 'Berita').toString(),
       imageUrl: (json['image_url'] ?? '').toString(),
       userpicture: (json['userpicture'] ?? '').toString(),
       publishTime: safeTime(),

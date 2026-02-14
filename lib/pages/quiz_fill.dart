@@ -181,8 +181,7 @@ class _BuildQuizState extends State<BuildQuizUI> {
     final quizBackgroundUrl = widget.quizBackgroundUrl;
     final choices = question['quiz_choices'] ?? [];
 
-    return SafeArea(
-      child: Stack(
+    return Stack(
         children: [
           Container(color: const Color.fromRGBO(217, 246, 252, 1)),
 
@@ -211,7 +210,7 @@ class _BuildQuizState extends State<BuildQuizUI> {
 
           // Content scrollable
           Positioned.fill(
-            top: 55,
+            top: 22,
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
               child: Column(
@@ -221,7 +220,7 @@ class _BuildQuizState extends State<BuildQuizUI> {
                     clipBehavior: Clip.none,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 45),
+                        padding: const EdgeInsets.only(top: 40),
                         child: ProgressAndQuestionCard(
                           questionText: questionText,
                           currentIndex: currentIndex,
@@ -290,7 +289,7 @@ class _BuildQuizState extends State<BuildQuizUI> {
                     child: const Text(
                       'Cek Jawaban',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontFamily: 'Afacad',
                         fontWeight: FontWeight.w700,
                         color: Color.fromRGBO(118, 181, 193, 1),
@@ -302,8 +301,7 @@ class _BuildQuizState extends State<BuildQuizUI> {
             ),
           ),
         ],
-      ),
-    );
+      );
 
   }
 }
@@ -370,6 +368,7 @@ class ProgressAndQuestionCard extends StatelessWidget{
             fontSize: 20, 
             fontWeight: FontWeight.w400,
             fontFamily: "Afacad", 
+            height: 1.2,
             color: Color.fromRGBO(118, 181, 193, 1)
             )
           ),
@@ -566,15 +565,15 @@ class ChoiceTile extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: Text(
                     text,
                     softWrap: true,
                     style: const TextStyle(
-                      fontSize: 20,
-                      height: 1.2,
+                      fontSize: 18,
+                      height: 1.0,
                       fontWeight: FontWeight.w400,
                       fontFamily: "Afacad",
                       color: Colors.black,
@@ -583,9 +582,9 @@ class ChoiceTile extends StatelessWidget {
                 ), 
                 const SizedBox(width: 10), 
                 Container(
-                  height: 30, 
-                  width: 30, 
-                  padding: EdgeInsets.all(5),
+                  height: 25, 
+                  width: 25, 
+                  padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: borderColor,
                     borderRadius: BorderRadius.circular(50),

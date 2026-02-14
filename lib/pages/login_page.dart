@@ -141,16 +141,20 @@ class _LoginPageState extends State<LoginPage> {
           ),
 
           Positioned(
-            top: 250,
+            top: 230,
             left: 0,
-            right: 0,
-            child: Container(
-              height: 550,
+            right: 0, 
+            bottom: 0,
+            child: Center(
+              child: Container(
               width: double.infinity,
               color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -290,6 +294,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+            ),
             ),
           ),
         ],

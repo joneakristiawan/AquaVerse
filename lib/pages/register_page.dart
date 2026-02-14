@@ -101,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.red, 
+        backgroundColor: Colors.white, 
         body: Stack(
           children: [
             Container(color: Colors.white), 
@@ -109,7 +109,8 @@ class _RegisterPageState extends State<RegisterPage> {
             ClipPath(
               clipper: WaveClipper(), 
               child: SizedBox(
-                height: 200,
+                // Tinggi Biru-Biru 
+                height: 165,
                   child: Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
@@ -122,144 +123,157 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ), 
 
-          Positioned(
-            top: 40,
-            left: 16,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: Icon(Icons.arrow_back),
-            ),
-          ),
+            Positioned(
+              top: 40,
+              left: 16,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Icon(Icons.arrow_back),
+              ),
+            ), 
 
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: SingleChildScrollView(
-                reverse: true, 
-                child: Container(
-                  // height: 710, 
-                  width: double.infinity,
-                  color: Colors.white, 
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25), 
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Registrasi", 
-                        style: TextStyle(
-                          fontSize: 40, 
-                          fontWeight: FontWeight.bold, 
-                        )
-                      ), 
-                        const SizedBox(height: 10,), 
-                        const Text('Daftarkan AquaAccount sekarang. Jelajahi dan bongkar rahasia paling gelap dalam laut dalam!', 
-                          style: TextStyle(
-                            fontSize: 15, 
-                            color: Color.fromRGBO(45, 45, 45, 1)
-                          ),
-                        ),
-                        const SizedBox(height: 30,), 
-                        const Text('Username'), 
-                        const SizedBox(height: 5,), 
-                        TextField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                            hintText: 'Masukkan Username di sini...', 
-                            filled: true, 
-                            fillColor: Colors.grey[200], 
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), 
-                              borderSide: BorderSide.none
+            Positioned(
+              // Tinggi Form Regist
+              top: 162, 
+              left: 0, 
+              right: 0, 
+              bottom: 0,
+              child: Container(
+                width: double.infinity, 
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    reverse: true, 
+                    child: Container(
+                      // height: 710, 
+                      width: double.infinity,
+                      color: Colors.white, 
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25), 
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Registrasi", 
+                            style: TextStyle(
+                              fontSize: 40, 
+                              fontWeight: FontWeight.bold, 
                             )
-                          )
-                        ), 
-                        const SizedBox(height: 15,), 
-                        const Text('Nama'), 
-                        const SizedBox(height: 5,), 
-                        TextField(
-                          controller: _nameController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                            hintText: 'Masukkan Nama di sini...', 
-                            filled: true, 
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), 
-                              borderSide: BorderSide.none
-                            )
-                          ),
-                        ), 
-                        const SizedBox(height: 15,), 
-                        const Text('E-mail'), 
-                        const SizedBox(height: 5,),
-                        TextField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                            hintText: 'Masukkan E-mail di sini...', 
-                            filled: true, 
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), 
-                              borderSide: BorderSide.none
-                            )
-                          ),
-                        ), 
-                        const SizedBox(height: 15,), 
-                        const Text('Password'), 
-                        const SizedBox(height: 5,), 
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
-                            hintText: 'Masukkan Password di sini...',
-                            filled: true, 
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10), 
-                              borderSide: BorderSide.none
-                            )
-                          ),
-                        ), 
-                        
-                        const SizedBox(height: 55,), 
-                        SizedBox(
-                          width: double.infinity, 
-                          height: 45,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromRGBO(105, 202, 249, 1), 
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)
-                              )
-                            ),
-                            onPressed: _isLoading ? null : _register,
-                            child: Text(
-                              'Daftarkan', 
+                          ), 
+                            const SizedBox(height: 7,), 
+                            const Text('Daftarkan AquaAccount sekarang. Jelajahi dan bongkar rahasia paling gelap!', 
                               style: TextStyle(
                                 fontSize: 15, 
-                                color: Colors.black
+                                color: Color.fromRGBO(45, 45, 45, 1)
                               ),
                             ),
-                          ),
-                        ), 
-                        const SizedBox(height: 35,), 
-                        const Center(
-                          child: Text(
-                            'Copyright © 2025 AquaVerse. All rights reserved', 
-                            style: TextStyle(
-                              fontSize: 13, 
-                              color: Color.fromRGBO(45, 45, 45, 1)
-                            ),
-                          ),
-                        )
-                      ]
+                            const SizedBox(height: 23,), 
+                            const Text('Username'), 
+                            const SizedBox(height: 5,), 
+                            TextField(
+                              controller: _usernameController,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                                hintText: 'Masukkan Username di sini...', 
+                                filled: true, 
+                                fillColor: Colors.grey[200], 
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10), 
+                                  borderSide: BorderSide.none
+                                )
+                              )
+                            ), 
+                            const SizedBox(height: 15,), 
+                            const Text('Nama'), 
+                            const SizedBox(height: 5,), 
+                            TextField(
+                              controller: _nameController,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                                hintText: 'Masukkan Nama di sini...', 
+                                filled: true, 
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10), 
+                                  borderSide: BorderSide.none
+                                )
+                              ),
+                            ), 
+                            const SizedBox(height: 15,), 
+                            const Text('E-mail'), 
+                            const SizedBox(height: 5,),
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                                hintText: 'Masukkan E-mail di sini...', 
+                                filled: true, 
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10), 
+                                  borderSide: BorderSide.none
+                                )
+                              ),
+                            ), 
+                            const SizedBox(height: 15,), 
+                            const Text('Password'), 
+                            const SizedBox(height: 5,), 
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                                hintText: 'Masukkan Password di sini...',
+                                filled: true, 
+                                fillColor: Colors.grey[200],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10), 
+                                  borderSide: BorderSide.none
+                                )
+                              ),
+                            ), 
+                            
+                            const SizedBox(height: 35,), 
+                            SizedBox(
+                              width: double.infinity, 
+                              height: 45,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color.fromRGBO(105, 202, 249, 1), 
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)
+                                  )
+                                ),
+                                onPressed: _isLoading ? null : _register,
+                                child: Text(
+                                  'Daftarkan', 
+                                  style: TextStyle(
+                                    fontSize: 15, 
+                                    color: Colors.black
+                                  ),
+                                ),
+                              ),
+                            ), 
+                            const SizedBox(height: 25,), 
+                            const Center(
+                              child: Text(
+                                'Copyright © 2025 AquaVerse. All rights reserved', 
+                                style: TextStyle(
+                                  fontSize: 13, 
+                                  color: Color.fromRGBO(45, 45, 45, 1)
+                                ),
+                              ),
+                            ), 
+                            const SizedBox(height: 10,)
+                          ]
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              )
+            )
         ],
       ),
     );

@@ -109,23 +109,25 @@ class _QuizPageState extends State<QuizPage> {
           final rankData = userData['user_rank']['ranks']; 
           final rankId = rankData['id']; 
           final rankName = rankData['name']; 
-          final rankMaxPoint = rankData['max_points']; 
+          final rankMaxPoint = rankData['max_points'] ?? 0; 
           final rankMinPoint = rankData['min_points']; 
           final imageFile = rankData['image_url']; 
           final String nextRankMessage; 
+          final String pointIndicator; 
           final int nextRankPoint; 
 
           final double userProgress; 
           if(rankName == 'Ocean Sovereign' && rankId == 5){
             userProgress = 1; 
             nextRankMessage = 'Kau sudah berada di Rank tertinggi!'; 
+            pointIndicator = '100++';  
           }
           else{
             userProgress = (points - rankMinPoint) / (rankMaxPoint - rankMinPoint + 1); 
             nextRankPoint = rankMaxPoint+1-points; 
             nextRankMessage = 'Hanya dalam $nextRankPoint poin lagi!'; 
+            pointIndicator = '$points/$rankMaxPoint'; 
           }
-
 
           final badgeUrl = supabase.storage
               .from('aquaverse')
@@ -188,7 +190,7 @@ class _QuizPageState extends State<QuizPage> {
 
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 91),
+                  padding: const EdgeInsets.only(top: 85),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +206,8 @@ class _QuizPageState extends State<QuizPage> {
                           rankMaxPoint: rankMaxPoint,
                           userProgress: userProgress,
                           badgeUrl: badgeUrl,
-                          coinsUrl: coinsUrl
+                          coinsUrl: coinsUrl, 
+                          pointIndicator: pointIndicator,
                         ),
                         
                         const SizedBox(height: 20,), 
@@ -300,6 +303,7 @@ class ProfilPrestasi extends StatelessWidget {
   final double userProgress;
   final String badgeUrl;
   final String coinsUrl; 
+  final String pointIndicator; 
 
   const ProfilPrestasi({
     super.key,
@@ -311,11 +315,14 @@ class ProfilPrestasi extends StatelessWidget {
     required this.rankMaxPoint,
     required this.userProgress,
     required this.badgeUrl,
-    required this.coinsUrl,
+    required this.coinsUrl, 
+    required this.pointIndicator
   });
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width; 
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -366,13 +373,18 @@ class ProfilPrestasi extends StatelessWidget {
                   horizontal: 20),
               child: Container(
                 height: 145,
+                padding: EdgeInsets.only(
+                  left: 8, 
+                  right: 10
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
+
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 20),
 
                     /// BADGE
                     Container(
@@ -390,7 +402,8 @@ class ProfilPrestasi extends StatelessWidget {
                     const SizedBox(width: 10),
 
                     /// INFO
-                    Column(
+                    Expanded(
+                      child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       
@@ -419,30 +432,35 @@ class ProfilPrestasi extends StatelessWidget {
                         ),),
                         const SizedBox(height: 8,), 
 
+      
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-                          children: <Widget>[
-                            Container(
-                              width: 20, 
-                              height: 20,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(coinsUrl)
-                                )
-                              ),
-                            ), 
-                            Text('$points'), 
-                            const SizedBox(width: 100,), 
-                            Text('$points/$rankMaxPoint', style: TextStyle(
-                              color: Color.fromRGBO(63, 68, 102, 1), 
-                              fontWeight: FontWeight.bold
-                            ),)
-                          ],
-                        ),
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                        children: <Widget>[
+                          Row(
+                            children: [
+                              Container(
+                            width: 20, 
+                            height: 20,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(coinsUrl)
+                              )
+                            ),
+                          ), 
+                          Text('$points'), 
+                            ],
+                          ), 
+                          Text(pointIndicator, style: TextStyle(
+                            color: Color.fromRGBO(63, 68, 102, 1), 
+                            fontWeight: FontWeight.bold
+                          ),)
+                        ],
+                      ),
+   
 
                         const SizedBox(height: 5,), 
                         SizedBox(
-                          width: 162,
+                          width: screenWidth * 0.42,
                           child: LinearProgressIndicator(
                             value: userProgress,
                             backgroundColor: Color.fromRGBO(148, 214, 245, 1), 
@@ -452,8 +470,10 @@ class ProfilPrestasi extends StatelessWidget {
                         ), 
                       ],
                     ),
+                    )
                   ],
                 ),
+
               ),
             )
           ],
@@ -470,11 +490,12 @@ class TingkatkanPoin extends StatelessWidget {
   const TingkatkanPoin({
     super.key, 
     required this.nextBadgeUrl, 
-    required this.nextRankMessage
+    required this.nextRankMessage, 
   }); 
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width; 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40),
       child: Container(
@@ -492,9 +513,9 @@ class TingkatkanPoin extends StatelessWidget {
               ]
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center, 
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(width: 43,),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center, 
                   children: [
@@ -506,7 +527,7 @@ class TingkatkanPoin extends StatelessWidget {
                     ),),
 
                     SizedBox(
-                      width: 180, 
+                      width: screenWidth * 0.43, 
                       height: 5, 
                       child: Container(
                         decoration: BoxDecoration(
@@ -558,19 +579,19 @@ class MulaiKuis extends StatelessWidget {
       padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
       child: Container(
         width: double.infinity, 
-        height: 250,
+        height: 230,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10), 
           image: DecorationImage(
             image: NetworkImage(startQuizBgPicUrl),  
-            fit: BoxFit.cover
+            fit: BoxFit.cover, 
           )
         ),
 
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 30),
+            padding: const EdgeInsets.only(bottom: 54),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -584,16 +605,16 @@ class MulaiKuis extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  height: 72,
-                  width: 227,
+                  height: 55,
+                  width: 177,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
                     child: Container(
-                      height: 55,
-                      width: 210,
+                      height: 40,
+                      width: 160,
                       decoration: BoxDecoration(
                         color: const Color.fromRGBO(148, 214, 245, 1),
                         borderRadius: BorderRadius.circular(8),
@@ -604,14 +625,14 @@ class MulaiKuis extends StatelessWidget {
                         children: [
                           Image.network(
                             playButtonUrl,
-                            height: 35,
-                            width: 35,
+                            height: 25,
+                            width: 25,
                           ),
                           const SizedBox(width: 10),
                           const Text(
                             "MULAI",
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 24,
                               fontFamily: "Montserrat",
                               fontWeight: FontWeight.bold,
                               color: Color.fromRGBO(63, 68, 102, 1),

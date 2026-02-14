@@ -96,7 +96,7 @@ class _QuizResultState extends State<QuizResult> {
           const SizedBox(height: 20), 
 
           Padding(
-            padding: EdgeInsetsGeometry.only(top: 630),
+            padding: EdgeInsetsGeometry.only(top: 580),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: SizedBox(
@@ -129,7 +129,7 @@ class _QuizResultState extends State<QuizResult> {
           ), 
 
           Padding(
-            padding: EdgeInsetsGeometry.only(top: 705),
+            padding: EdgeInsetsGeometry.only(top: 655),
             child: Padding(
               padding: EdgeInsets.all(20),
               child: SizedBox(
@@ -214,7 +214,7 @@ class DisplayHeaderResult extends StatelessWidget {
       top: 0,
       left: 0,
       right: 0,
-      height: 380,
+      height: 350,
       child: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -230,8 +230,8 @@ class DisplayHeaderResult extends StatelessWidget {
         child: Center(
           child: Container(
             padding: EdgeInsets.all(15),
-            height: 210, 
-            width: 210, 
+            height: 200, 
+            width: 200, 
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.6), 
               borderRadius: BorderRadius.circular(210)
@@ -254,7 +254,7 @@ class DisplayHeaderResult extends StatelessWidget {
                   )), 
                   // const SizedBox(height: 10), 
                   Text('$percentageScore%', style: TextStyle(
-                    fontSize: 72, 
+                    fontSize: 64, 
                     fontFamily: 'Afacad', 
                     height: 1.0,
                     fontWeight: FontWeight.bold,
@@ -283,15 +283,15 @@ class ResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      top: 270, 
+      top: 255, 
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
         child: Container(
           padding: EdgeInsets.only(
-            left: 40, 
-            right: 40
+            left: 20, 
+            right: 20
           ),
-          height: 270, 
+          height: 240, 
           width: double.infinity, 
           decoration: BoxDecoration(
             color: Colors.white, 
@@ -304,154 +304,158 @@ class ResultCard extends StatelessWidget {
               )
             ]
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, 
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    height: 30, 
-                    width: 30, 
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(28, 133, 153, 1), 
-                      borderRadius: BorderRadius.circular(30)
+          child: Padding(
+            padding: EdgeInsetsGeometry.only(left: 23), 
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              crossAxisAlignment: CrossAxisAlignment.center,
+              
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      height: 30, 
+                      width: 30, 
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(28, 133, 153, 1), 
+                        borderRadius: BorderRadius.circular(30)
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 15), 
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('90%', style: TextStyle(
-                          fontSize: 40, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(28, 133, 153, 1)
-                        )), 
-                        const SizedBox(height: 5), 
-                        Text('Selesai', style: TextStyle(
-                          fontSize: 24, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        )), 
-                      ],
-                    ),
-                  ), 
-                  
-                  const SizedBox(width: 50,), 
+                    const SizedBox(width: 15), 
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('+$score', style: TextStyle(
+                            fontSize: 32, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(28, 133, 153, 1)
+                          )), 
+                          const SizedBox(height: 5), 
+                          Text('Poin', style: TextStyle(
+                            fontSize: 24, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black
+                          )), 
+                        ],
+                      ),
+                    ), 
+                    
+                    const SizedBox(width: 50,), 
 
-                  Container(
-                    height: 30, 
-                    width: 30, 
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(28, 133, 153, 1), 
-                      borderRadius: BorderRadius.circular(30)
+                    Container(
+                      height: 30, 
+                      width: 30, 
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(28, 133, 153, 1), 
+                        borderRadius: BorderRadius.circular(30)
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 15), 
-                  Expanded(
-                    child:   Column(
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$totalQuestions', style: TextStyle(
-                          fontSize: 40, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(28, 133, 153, 1)
-                        )), 
-                        const SizedBox(height: 5), 
-                        Text('Soal', style: TextStyle(
-                          fontSize: 24, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        )), 
-                      ],
+                    const SizedBox(width: 15), 
+                    Expanded(
+                      child:   Column(
+                        mainAxisAlignment: MainAxisAlignment.center, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$totalQuestions', style: TextStyle(
+                            fontSize: 32, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(28, 133, 153, 1)
+                          )), 
+                          const SizedBox(height: 5), 
+                          Text('Soal', style: TextStyle(
+                            fontSize: 24, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black
+                          )), 
+                        ],
+                      )
                     )
-                  )
-                  
-                ],
-              ), 
-              const SizedBox(height: 30), 
-              Row(
-                children: [
-                  Container(
-                    height: 30, 
-                    width: 30, 
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(31, 132, 53, 1), 
-                      borderRadius: BorderRadius.circular(30)
+                    
+                  ],
+                ), 
+                const SizedBox(height: 30), 
+                Row(
+                  children: [
+                    Container(
+                      height: 30, 
+                      width: 30, 
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(31, 132, 53, 1), 
+                        borderRadius: BorderRadius.circular(30)
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 15), 
-                  Expanded(
-                    child:   Column(
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$score', style: TextStyle(
-                          fontSize: 40, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(31, 132, 53, 1), 
-                        )), 
-                        const SizedBox(height: 5), 
-                        Text('Benar', style: TextStyle(
-                          fontSize: 24, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        )), 
-                      ],
+                    const SizedBox(width: 15), 
+                    Expanded(
+                      child:   Column(
+                        mainAxisAlignment: MainAxisAlignment.center, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$score', style: TextStyle(
+                            fontSize: 32, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(31, 132, 53, 1), 
+                          )), 
+                          const SizedBox(height: 5), 
+                          Text('Benar', style: TextStyle(
+                            fontSize: 24, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black
+                          )), 
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 50,), 
-                  Container(
-                    height: 30, 
-                    width: 30, 
-                    decoration: BoxDecoration(
-                      color: Color.fromRGBO(208, 90, 4, 1), 
-                      borderRadius: BorderRadius.circular(30)
+                    const SizedBox(width: 50,), 
+                    Container(
+                      height: 30, 
+                      width: 30, 
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(208, 90, 4, 1), 
+                        borderRadius: BorderRadius.circular(30)
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 15), 
-                  Expanded(
-                    child:   Column(
-                      mainAxisAlignment: MainAxisAlignment.center, 
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('$incorrectScore', style: TextStyle(
-                          fontSize: 40, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(208, 90, 4, 1)
-                        )), 
-                        const SizedBox(height: 5), 
-                        Text('Salah', style: TextStyle(
-                          fontSize: 24, 
-                          fontFamily: 'Afacad', 
-                          height: 1.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        )), 
-                      ],
-                    ),
-                  )
-                ],
-              )
-            ],
-          ),
+                    const SizedBox(width: 15), 
+                    Expanded(
+                      child:   Column(
+                        mainAxisAlignment: MainAxisAlignment.center, 
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$incorrectScore', style: TextStyle(
+                            fontSize: 32, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(208, 90, 4, 1)
+                          )), 
+                          const SizedBox(height: 5), 
+                          Text('Salah', style: TextStyle(
+                            fontSize: 24, 
+                            fontFamily: 'Afacad', 
+                            height: 1.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black
+                          )), 
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          )
         ),
       ),
     ); 

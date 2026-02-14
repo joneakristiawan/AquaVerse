@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'quiz_fill.dart'; 
-
+import 'package:intl/intl.dart'; 
 
 class QuizPage extends StatefulWidget {
   const QuizPage({super.key});
@@ -83,12 +83,37 @@ class _QuizPageState extends State<QuizPage> {
     return res;
   }
 
+  Future<List<Map<String, dynamic>>> fetchLeaderboardData() async {
+    
+    final res = await supabase
+        .from('daily_leaderboard_view')
+        .select(); 
+
+    return res;
+  }
+
+  Future<Map<String, dynamic>> fetchAllData() async {
+    final results = await Future.wait([
+      fetchUserData(), 
+      fetchLeaderboardData()
+    ]); 
+
+    return {
+      'user': results[0], 
+      'leaderboard': results[1]
+    }; 
+  }
+
   @override
   Widget build(BuildContext context) {
+    Intl.defaultLocale = 'id_ID'; 
+    DateTime now = DateTime.now(); 
+    String formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now); 
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: FutureBuilder<Map<String, dynamic>>(
-        future: userFuture,
+        future: fetchAllData(),
         builder: (context, snapshot) {
 
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -101,7 +126,7 @@ class _QuizPageState extends State<QuizPage> {
             );
           }
 
-          final userData = snapshot.data!;
+          final userData = snapshot.data!['user'] as Map<String, dynamic>;
           final username = userData['username'];
           final name = userData['name']; 
           final points = userData['user_rank']['points']; 
@@ -129,6 +154,8 @@ class _QuizPageState extends State<QuizPage> {
             pointIndicator = '$points/$rankMaxPoint'; 
           }
 
+          final leaderboardData = snapshot.data!['leaderboard'] as List<Map<String, dynamic>>; 
+
           final badgeUrl = supabase.storage
               .from('aquaverse')
               .getPublicUrl('assets/images/ranks/$imageFile'); 
@@ -155,7 +182,6 @@ class _QuizPageState extends State<QuizPage> {
               .getPublicUrl('assets/images/ranks/rank_5_ocean_sovereign.png'); 
           }
           
-
           return Stack(
             children: [
               Positioned(
@@ -190,7 +216,7 @@ class _QuizPageState extends State<QuizPage> {
 
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 85),
+                  padding: const EdgeInsets.only(top: 91),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,13 +267,40 @@ class _QuizPageState extends State<QuizPage> {
                           ),),
                         ),
 
-                        const SizedBox(height: 15,), 
+                        const SizedBox(height: 20,), 
 
                         MulaiKuis(
                           startQuizBgPicUrl: startQuizBgPicUrl, 
                           playButtonUrl: playButtonUrl
                         ), 
+                        
+                        Padding(
+                          padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                          child: const Text("Peringkat Harian", style: TextStyle(
+                            fontSize: 28, 
+                            fontFamily: 'Montserrat',
+                            height: 1.4,
+                            fontWeight: FontWeight.bold, 
+                            color: Color.fromRGBO(63, 68, 102, 1), 
+                          ),), 
+                        ),
+                        
+                        Padding(
+                          padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
+                          child: Text(formattedDate, style: TextStyle(
+                            fontSize: 22, 
+                            fontFamily: 'Montserrat',
+                            height: 1.0,
+                            fontWeight: FontWeight.bold, 
+                            color: Colors.black
+                          ),),
+                        ),
 
+                        const SizedBox(height: 25,), 
+
+                        PodiumPeringkatHarian(
+                          coinsUrl: coinsUrl
+                        ), 
                       ],
                     ),
                   ),
@@ -456,8 +509,6 @@ class ProfilPrestasi extends StatelessWidget {
                           ),)
                         ],
                       ),
-   
-
                         const SizedBox(height: 5,), 
                         SizedBox(
                           width: screenWidth * 0.42,
@@ -579,7 +630,7 @@ class MulaiKuis extends StatelessWidget {
       padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
       child: Container(
         width: double.infinity, 
-        height: 230,
+        height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10), 
           image: DecorationImage(
@@ -591,7 +642,7 @@ class MulaiKuis extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 54),
+            padding: const EdgeInsets.only(bottom: 45),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -650,5 +701,190 @@ class MulaiKuis extends StatelessWidget {
 
       ),
     ); 
+  }
+}
+
+class PodiumPeringkatHarian extends StatelessWidget {
+  final String coinsUrl; 
+
+  const PodiumPeringkatHarian({
+    super.key, 
+    required this.coinsUrl
+  }); 
+
+  @override 
+  Widget build(BuildContext context){
+
+    return Stack(
+        children: [
+          Container(
+            height: 450, 
+            width: double.infinity, 
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(217, 246, 252, 1),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30), 
+                topRight: Radius.circular(30) 
+              )
+            ),
+          ), 
+
+          Padding(
+            padding: EdgeInsetsGeometry.all(20), 
+            child: Align(
+              alignment: AlignmentGeometry.topRight, 
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white, 
+                  borderRadius: BorderRadius.circular(10)
+                ),
+                child: Text('🏆 Kamu ada di Peringkat 3!', style: TextStyle(
+                  fontSize: 18, 
+                  fontFamily: "Afacad", 
+                  color: Colors.black
+                ),),
+              ), 
+            ),
+          ), 
+          
+          // Podium 2 
+          Positioned(
+            top: 230, 
+            left: 0, 
+            right: 240,
+            bottom: 0, 
+            child: Column(
+              children: [
+                Container(
+                  width: 100, 
+                  height: 220,
+                  decoration: BoxDecoration(
+                    color: Colors.green, 
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30), 
+                      topRight: Radius.circular(30)
+                    )
+                  ),
+                )
+              ],
+            ),
+          ), 
+          
+          // Podium 1 
+          Positioned(
+            top: 180, 
+            left: 0, 
+            right: 10,
+            bottom: 0, 
+            child: Column(
+              children: [
+                Container(
+                  width: 110, 
+                  height: 270,
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(148, 214, 245, 1), 
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30), 
+                      topRight: Radius.circular(30)
+                    )
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: AlignmentGeometry.topCenter,
+                    children: [
+                      Positioned(
+                        top: -50, 
+                        child: Container(
+                          height: 100, 
+                          width: 100, 
+                          decoration: BoxDecoration(
+                            color: Colors.white, 
+                            borderRadius: BorderRadius.circular(100)
+                          
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ), 
+            
+              ],
+            ),
+          ), 
+
+          // Podium 3 
+          Positioned(
+            top: 280, 
+            right: 0, 
+            left: 230,
+            bottom: 0, 
+            child: Column(
+              children: [
+                Container(
+                  width: 110, 
+                  height: 170,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30), 
+                      topRight: Radius.circular(30)
+                    )
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+    ); 
+  }
+}
+
+class PodiumItem extends StatelessWidget {
+  final int rank;
+  final double height;
+  final String percent;
+
+  const PodiumItem({
+    super.key,
+    required this.rank,
+    required this.height,
+    required this.percent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        CircleAvatar(
+          radius: 30,
+          child: Text("$rank"),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: height,
+          decoration: BoxDecoration(
+            color: Colors.blue.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "$rank",
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(percent),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

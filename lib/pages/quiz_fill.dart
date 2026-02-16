@@ -127,6 +127,18 @@ class _BuildQuizState extends State<BuildQuizUI> {
         remainingTimeNotifier.value--; 
       }else{
         t.cancel(); 
+        
+        setState(() {
+          hasAnswered = true; 
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Waktu habis!'), 
+            duration: Duration(seconds: 3),
+          )
+        ); 
+
         _submitAnswer(auto: true); 
       }
     });
@@ -295,7 +307,9 @@ class _BuildQuizState extends State<BuildQuizUI> {
                         color: Color.fromRGBO(118, 181, 193, 1),
                       ),
                     ),
-                  ),
+                  ), 
+
+                  const SizedBox(height: 50,)
                 ],
               ),
             ),
@@ -590,7 +604,7 @@ class ChoiceTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                   ),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250), 
+                    duration: const Duration(milliseconds: 300), 
                     curve: Curves.easeInOut, 
                     width: double.infinity, 
                     height: 5,

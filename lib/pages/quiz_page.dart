@@ -144,7 +144,7 @@ class _QuizPageState extends State<QuizPage> {
           final double userProgress; 
           if(rankName == 'Ocean Sovereign' && rankId == 5){
             userProgress = 1; 
-            nextRankMessage = 'Kau sudah berada di Rank tertinggi!'; 
+            nextRankMessage = 'Kau sudah di Rank tertinggi!'; 
             pointIndicator = '100++';  
           }
           else{
@@ -181,6 +181,18 @@ class _QuizPageState extends State<QuizPage> {
               .from('aquaverse')
               .getPublicUrl('assets/images/ranks/rank_5_ocean_sovereign.png'); 
           }
+
+          // Buat tau urutan leaderboard User 
+
+          final user = Supabase.instance.client.auth.currentUser; 
+          final currentUserId = user?.id; 
+          final userIndex = leaderboardData.indexWhere(
+            (user) => user['user_id'] == currentUserId, 
+          ); 
+
+          final int userRank = userIndex == -1 ? -1 : (userIndex + 1); 
+          final String leaderboardMessage = userRank != -1 ? 
+            "🏆 Kamu ada di Peringkat $userRank!" : "⌛ Ayo Segera Kerjakan Kuis!"; 
           
           return Stack(
             children: [
@@ -299,8 +311,14 @@ class _QuizPageState extends State<QuizPage> {
                         const SizedBox(height: 25,), 
 
                         PodiumPeringkatHarian(
-                          coinsUrl: coinsUrl
+                          coinsUrl: coinsUrl, 
+                          leaderboardData: leaderboardData, 
+                          leaderboardMessage: leaderboardMessage
                         ), 
+
+                        RunnerUpPeringkatHarian(
+                          leaderboardData: leaderboardData, 
+                        )
                       ],
                     ),
                   ),
@@ -706,14 +724,42 @@ class MulaiKuis extends StatelessWidget {
 
 class PodiumPeringkatHarian extends StatelessWidget {
   final String coinsUrl; 
+  final List<Map<String, dynamic>> leaderboardData; 
+  final String leaderboardMessage; 
 
   const PodiumPeringkatHarian({
     super.key, 
-    required this.coinsUrl
+    required this.coinsUrl, 
+    required this.leaderboardData, 
+    required this.leaderboardMessage
   }); 
 
   @override 
   Widget build(BuildContext context){
+
+    final String firstPlaceUsername = leaderboardData[0]['username']; 
+    final String secondPlaceUsername = leaderboardData[1]['username']; 
+    final String thirdPlaceUsername = leaderboardData[2]['username']; 
+
+    final int firstPlaceScore = leaderboardData[0]['score']; 
+    final int secondPlaceScore = leaderboardData[1]['score']; 
+    final int thirdPlaceScore = leaderboardData[2]['score']; 
+
+    String badgePlaceholder = leaderboardData[0]['rank_img_url']; 
+    final String firstPlaceBadgeUrl = Supabase.instance.client.storage
+      .from('aquaverse').getPublicUrl('assets/images/ranks/$badgePlaceholder'); 
+
+    badgePlaceholder = leaderboardData[1]['rank_img_url']; 
+    final String secondPlaceBadgeUrl = Supabase.instance.client.storage
+      .from('aquaverse').getPublicUrl('assets/images/ranks/$badgePlaceholder'); 
+    
+    badgePlaceholder = leaderboardData[2]['rank_img_url']; 
+    final String thirdPlaceBadgeUrl = Supabase.instance.client.storage
+      .from('aquaverse').getPublicUrl('assets/images/ranks/$badgePlaceholder'); 
+    
+    final leaderboardBubblesUrl = Supabase.instance.client.storage
+      .from('aquaverse').getPublicUrl('assets/images/quiz/Leaderboard_Bubbles.png');
+
 
     return Stack(
         children: [
@@ -739,7 +785,7 @@ class PodiumPeringkatHarian extends StatelessWidget {
                   color: Colors.white, 
                   borderRadius: BorderRadius.circular(10)
                 ),
-                child: Text('🏆 Kamu ada di Peringkat 3!', style: TextStyle(
+                child: Text(leaderboardMessage, style: TextStyle(
                   fontSize: 18, 
                   fontFamily: "Afacad", 
                   color: Colors.black
@@ -757,16 +803,74 @@ class PodiumPeringkatHarian extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  width: 100, 
+                  width: 110, 
                   height: 220,
                   decoration: BoxDecoration(
-                    color: Colors.green, 
+                    color: const Color.fromRGBO(148, 214, 245, 1), 
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30), 
                       topRight: Radius.circular(30)
                     )
                   ),
-                )
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: AlignmentGeometry.topCenter,
+                    children: [
+                      Positioned(
+                        top: -50, 
+                        child: Container(
+                          height: 100, 
+                          width: 100, 
+                          decoration: BoxDecoration(
+                            color: Colors.white, 
+                            borderRadius: BorderRadius.circular(100)
+                          ),
+                          child: Center(
+                            child: Container(
+                              height: 90, 
+                              width: 90, 
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(secondPlaceBadgeUrl), 
+                                  fit: BoxFit.cover
+                                )
+                              )
+                            )
+                          )
+                        ),
+                      ), 
+
+                      Positioned(
+                        top: -80, 
+                        child: Text(secondPlaceUsername, style: TextStyle(
+                          fontSize: 18, 
+                          fontFamily: 'Afacad', 
+                          color: Colors.black.withValues(alpha: 0.7)
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 50, 
+                        child: Text('2', style: TextStyle(
+                          fontSize: 64, 
+                          fontFamily: 'Montserrat', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 135, 
+                        child: Text('$secondPlaceScore%', style: TextStyle(
+                          fontSize: 24, 
+                          fontFamily: 'Afacad', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
+                      )
+                    ],
+                  ),
+                ), 
               ],
             ),
           ), 
@@ -775,7 +879,7 @@ class PodiumPeringkatHarian extends StatelessWidget {
           Positioned(
             top: 180, 
             left: 0, 
-            right: 10,
+            right: 0,
             bottom: 0, 
             child: Column(
               children: [
@@ -801,9 +905,49 @@ class PodiumPeringkatHarian extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: Colors.white, 
                             borderRadius: BorderRadius.circular(100)
-                          
                           ),
+                          child: Center(
+                            child: Container(
+                              height: 90, 
+                              width: 90, 
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(firstPlaceBadgeUrl), 
+                                  fit: BoxFit.cover
+                                )
+                              )
+                            )
+                          )
                         ),
+                      ), 
+
+                      Positioned(
+                        top: -80, 
+                        child: Text(firstPlaceUsername, style: TextStyle(
+                          fontSize: 18, 
+                          fontFamily: 'Afacad', 
+                          color: Colors.black.withValues(alpha: 0.7)
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 50, 
+                        child: Text('1', style: TextStyle(
+                          fontSize: 64, 
+                          fontFamily: 'Montserrat', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 135, 
+                        child: Text('$firstPlaceScore%', style: TextStyle(
+                          fontSize: 24, 
+                          fontFamily: 'Afacad', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
                       )
                     ],
                   ),
@@ -817,7 +961,7 @@ class PodiumPeringkatHarian extends StatelessWidget {
           Positioned(
             top: 280, 
             right: 0, 
-            left: 230,
+            left: 240,
             bottom: 0, 
             child: Column(
               children: [
@@ -825,14 +969,87 @@ class PodiumPeringkatHarian extends StatelessWidget {
                   width: 110, 
                   height: 170,
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: const Color.fromRGBO(148, 214, 245, 1), 
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30), 
                       topRight: Radius.circular(30)
                     )
                   ),
-                )
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: AlignmentGeometry.topCenter,
+                    children: [
+                      Positioned(
+                        top: -50, 
+                        child: Container(
+                          height: 100, 
+                          width: 100, 
+                          decoration: BoxDecoration(
+                            color: Colors.white, 
+                            borderRadius: BorderRadius.circular(100)
+                          ),
+                          child: Center(
+                            child: Container(
+                              height: 90, 
+                              width: 90, 
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(thirdPlaceBadgeUrl), 
+                                  fit: BoxFit.cover
+                                )
+                              )
+                            )
+                          )
+                        ),
+                      ), 
+
+                      Positioned(
+                        top: -80, 
+                        child: Text(thirdPlaceUsername, style: TextStyle(
+                          fontSize: 18, 
+                          fontFamily: 'Afacad', 
+                          color: Colors.black.withValues(alpha: 0.8)
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 40, 
+                        child: Text('3', style: TextStyle(
+                          fontSize: 64, 
+                          fontFamily: 'Montserrat', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
+                      ), 
+
+                      Positioned(
+                        top: 125, 
+                        child: Text('$thirdPlaceScore%', style: TextStyle(
+                          fontSize: 24, 
+                          fontFamily: 'Afacad', 
+                          fontWeight: FontWeight.bold, 
+                          color: Colors.white
+                        ),),
+                      ), 
+                    ],
+                  ),
+                ), 
               ],
+            ),
+          ), 
+
+          Positioned(
+            top: 30, 
+            left: 10, 
+            child: Container(
+              height: 80, 
+              width: 80, 
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(leaderboardBubblesUrl), 
+                  fit: BoxFit.cover
+                )
+              ),
             ),
           )
         ],
@@ -840,51 +1057,130 @@ class PodiumPeringkatHarian extends StatelessWidget {
   }
 }
 
-class PodiumItem extends StatelessWidget {
-  final int rank;
-  final double height;
-  final String percent;
+class RunnerUpPeringkatHarian extends StatelessWidget {
+  final List<Map<String, dynamic>> leaderboardData; 
 
-  const PodiumItem({
-    super.key,
-    required this.rank,
-    required this.height,
-    required this.percent,
-  });
+  const RunnerUpPeringkatHarian({
+    super.key, 
+    required this.leaderboardData
+  }); 
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
+    final bool hasRunnerUp = leaderboardData.length > 3; 
+
+    final List<Map<String, dynamic>> remainings = hasRunnerUp ? 
+      leaderboardData.sublist(3) : []; 
+
+    return Stack(
       children: [
-        CircleAvatar(
-          radius: 30,
-          child: Text("$rank"),
-        ),
-        const SizedBox(height: 8),
         Container(
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.blue.shade200,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "$rank",
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(percent),
-              ],
-            ),
-          ),
-        ),
+          color: const Color.fromRGBO(217, 246, 252, 1),
+          width: double.infinity, 
+          height: 40,
+        ), 
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity, 
+              // height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white, 
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30), 
+                  topRight: Radius.circular(30)
+                )
+              ),
+              padding: const EdgeInsets.all(10),
+              child: hasRunnerUp ? 
+                ListView.builder(
+                  shrinkWrap: true, 
+                  physics: NeverScrollableScrollPhysics(), 
+                  itemCount: remainings.length, 
+                  itemBuilder: (context, index) {
+                    final item = remainings[index]; 
+                    final String badgePlaceholder = item['rank_img_url']; 
+                    final badgeUrl = Supabase.instance.client.storage
+                      .from('aquaverse').getPublicUrl('assets/images/ranks/$badgePlaceholder'); 
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        // color: const Color(0xFFF5F5F5),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            "${index + 4}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20, 
+                              fontFamily: 'Montserrat', 
+                              color: Colors.black
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+
+                          Container(
+                            height: 55, 
+                            width: 55, 
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(badgeUrl)
+                              )
+                            ),
+                          ), 
+
+                          const SizedBox(width: 15), 
+
+                          Expanded(
+                            child: Text(item['username'] ?? '-', style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20, 
+                              fontFamily: 'Afacad', 
+                              color: Colors.black
+                            ),),
+                          ),
+                          Container(
+                            height: 35, 
+                            width: 75, 
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(148, 214, 245, 1), 
+                              borderRadius: BorderRadius.circular(20)
+                            ),
+                            child: Text("${item['score'] ?? 0}%", style: TextStyle(
+                              fontSize: 20, 
+                              fontFamily: 'Afacad', 
+                              color: Colors.black
+                          )),
+                          )
+                        ],
+                      ),
+                    ); 
+                  },
+                ) : 
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      "Tidak ada Runner Up pada Hari Ini",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                        color: Colors.grey,
+                      )
+                    )
+                  )
+                )
+            )
+          ],
+        )
       ],
-    );
+    ); 
   }
 }

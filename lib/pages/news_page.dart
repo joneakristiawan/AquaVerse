@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 // Pastikan path ini sesuai sama lokasi file class lu
 import '../class/news_class.dart'; 
+import 'package:intl/intl.dart'; 
 
 class NewsPage extends StatefulWidget {
+  const NewsPage({super.key}); 
+
   @override
-  _NewsPageState createState() => _NewsPageState();
+  State<NewsPage> createState() => _NewsPageState();
 }
 
 class _NewsPageState extends State<NewsPage> {
   // Config storage sesuai settings Supabase lu
   final String _storageBucket = 'aquaverse';
   final String _storageFolder = 'assets/images/news';
+  final supabase = Supabase.instance.client; 
 
   // Stream data, diurutkan berdasarkan publishTime terbaru
   final _newsStream = Supabase.instance.client
@@ -125,183 +129,280 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    
+    final aquaVerseLogoUrl = supabase.storage
+      .from('aquaverse')
+      .getPublicUrl('assets/images/logo/Logo-AquaVerse.png'); 
+
+    final newsLogoUrl = supabase.storage
+      .from('aquaverse')
+      .getPublicUrl('assets/images/news/Text-AquaVerseNews.png'); 
+
+    Intl.defaultLocale = 'id_ID'; 
+    DateTime now = DateTime.now(); 
+    String formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now); 
+
     return Scaffold(
       backgroundColor: Colors.grey[50], // Background agak abu dikit biar Card putihnya "pop out"
-      appBar: AppBar(
-        title: Text(
-          "AquaVerse News", 
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
-        ),
-        iconTheme: IconThemeData(color: Colors.white), // Biar tombol back/drawer jadi putih
-        elevation: 0,
-        // --- GRADIENT BACKGROUND ---
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0D47A1), Color(0xFF42A5F5)], // Biru Tua ke Biru Laut
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 180,
+            child: Container(
+              padding: const EdgeInsets.only(top: 40),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(148, 214, 245, 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      const SizedBox(width: 20),
+                      Image.network(aquaVerseLogoUrl, height: 55),
+                      const SizedBox(width: 15),
+                      Image.network(newsLogoUrl, height: 27),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 15,
+                      left: 15, 
+                      right: 15
+                    ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Telusuri: Berita Kelautan...",
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white, // Search bar putih
+                        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                        // Tambahin shadow dikit di search bar biar manis
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Colors.grey.shade200),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
+              )
+              
+              
+              
             ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: Colors.white), 
-            onPressed: () {}
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Telusuri: Berita Kelautan...",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white, // Search bar putih
-                contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                // Tambahin shadow dikit di search bar biar manis
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+
+          const FrostedGlass(),
+
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsetsGeometry.only(top: 170),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, 
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                      child: const Text("Peringkat Harian", style: TextStyle(
+                        fontSize: 28, 
+                        fontFamily: 'Montserrat',
+                        height: 1.4,
+                        fontWeight: FontWeight.bold, 
+                        color: Color.fromRGBO(63, 68, 102, 1), 
+                      ),), 
+                    ),
+                    
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 20), 
+                      child: Text(formattedDate, style: TextStyle(
+                        fontSize: 22, 
+                        fontFamily: 'Montserrat',
+                        height: 1.0,
+                        fontWeight: FontWeight.bold, 
+                        color: Colors.black
+                      ),),
+                    ),
+
+                    const SizedBox(height: 10,), 
+                    
+                    // List Berita
+                    StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: _newsStream,
+                      builder: (context, snapshot) {
+                        // 1. Loading
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        // 2. Error
+                        if (snapshot.hasError) {
+                          return Center(child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text("Error: ${snapshot.error}", textAlign: TextAlign.center),
+                          ));
+                        }
+                        // 3. Kosong
+                        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          return Center(child: Text("Belum ada berita."));
+                        }
+
+                        // --- LOGIC FIX IMAGE URL ---
+                        final newsList = snapshot.data!.map((data) {
+                          String rawUrl = (data['image_url'] ?? '').toString();
+                          // Cek apakah URL masih mentah (nama file doang)
+                          if (rawUrl.isNotEmpty && !rawUrl.startsWith('http')) {
+                            final publicUrl = Supabase.instance.client
+                                .storage
+                                .from(_storageBucket)
+                                .getPublicUrl('$_storageFolder/$rawUrl');
+                            data['image_url'] = publicUrl;
+                          }
+                          return News.fromJson(data);
+                        }).toList();
+
+                        return ListView.builder(
+                          shrinkWrap: true, 
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.only(bottom: 20),
+                          itemCount: newsList.length,
+                          itemBuilder: (context, index) {
+                            final item = newsList[index];
+                            
+                            // --- CARD DESIGN (Float & Rounded) ---
+                            return Card(
+                              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              elevation: 3, // Bayangan biar ngambang
+                              shadowColor: Colors.blue.withValues(alpha: 0.1), // Bayangan agak biru dikit
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              color: Colors.white,
+                              child: InkWell(
+                                onTap: () => _showNewsDetail(context, item),
+                                borderRadius: BorderRadius.circular(16),
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Gambar Kiri
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: item.imageUrl.isNotEmpty
+                                            ? Image.network(
+                                                item.imageUrl, 
+                                                width: 90, 
+                                                height: 90, 
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) => Container(width: 90, height: 90, color: Colors.grey[200], child: Icon(Icons.broken_image, color: Colors.grey)), 
+                                              )
+                                            : Container(width: 90, height: 90, color: Colors.grey[200], child: Icon(Icons.image, color: Colors.grey)),
+                                      ),
+                                      SizedBox(width: 16),
+                                      
+                                      // Konten Kanan
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Kategori
+                                            Text(
+                                              item.category, 
+                                              style: TextStyle(color: Colors.blue, fontSize: 11, fontWeight: FontWeight.w700)
+                                            ),
+                                            SizedBox(height: 4),
+                                            // Judul
+                                            Text(
+                                              item.title, 
+                                              maxLines: 2, 
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
+                                            ),
+                                            SizedBox(height: 8),
+                                            // Author & Tanggal
+                                            Row(
+                                              children: [
+                                                Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                                                SizedBox(width: 4),
+                                                Expanded(
+                                                  child: Text(
+                                                    item.author,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                                  ),
+                                                ),
+                                                Text("• ", style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+                                                Text(
+                                                  "${item.publishTime.day}/${item.publishTime.month}",
+                                                  style: TextStyle(fontSize: 11, color: Colors.grey[600])
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+
+           
+                  ],
                 ),
               ),
             ),
-          ),
-          
-          // List Berita
-          Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: _newsStream,
-              builder: (context, snapshot) {
-                // 1. Loading
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                // 2. Error
-                if (snapshot.hasError) {
-                  return Center(child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text("Error: ${snapshot.error}", textAlign: TextAlign.center),
-                  ));
-                }
-                // 3. Kosong
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text("Belum ada berita."));
-                }
+          )
+        ],
+      ),
+    );
+  }
+}
 
-                // --- LOGIC FIX IMAGE URL ---
-                final newsList = snapshot.data!.map((data) {
-                  String rawUrl = (data['image_url'] ?? '').toString();
-                  // Cek apakah URL masih mentah (nama file doang)
-                  if (rawUrl.isNotEmpty && !rawUrl.startsWith('http')) {
-                    final publicUrl = Supabase.instance.client
-                        .storage
-                        .from(_storageBucket)
-                        .getPublicUrl('$_storageFolder/$rawUrl');
-                    data['image_url'] = publicUrl;
-                  }
-                  return News.fromJson(data);
-                }).toList();
-                // ---------------------------
+/// Frosted Glass 
+class FrostedGlass extends StatelessWidget {
+  const FrostedGlass({super.key});
 
-                return ListView.builder(
-                  padding: EdgeInsets.only(bottom: 20),
-                  itemCount: newsList.length,
-                  itemBuilder: (context, index) {
-                    final item = newsList[index];
-                    
-                    // --- CARD DESIGN (Float & Rounded) ---
-                    return Card(
-                      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      elevation: 3, // Bayangan biar ngambang
-                      shadowColor: Colors.blue.withOpacity(0.1), // Bayangan agak biru dikit
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      color: Colors.white,
-                      child: InkWell(
-                        onTap: () => _showNewsDetail(context, item),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Gambar Kiri
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: item.imageUrl.isNotEmpty
-                                    ? Image.network(
-                                        item.imageUrl, 
-                                        width: 90, 
-                                        height: 90, 
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Container(width: 90, height: 90, color: Colors.grey[200], child: Icon(Icons.broken_image, color: Colors.grey)), 
-                                      )
-                                    : Container(width: 90, height: 90, color: Colors.grey[200], child: Icon(Icons.image, color: Colors.grey)),
-                              ),
-                              SizedBox(width: 16),
-                              
-                              // Konten Kanan
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Kategori
-                                    Text(
-                                      item.category, 
-                                      style: TextStyle(color: Colors.blue, fontSize: 11, fontWeight: FontWeight.w700)
-                                    ),
-                                    SizedBox(height: 4),
-                                    // Judul
-                                    Text(
-                                      item.title, 
-                                      maxLines: 2, 
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)
-                                    ),
-                                    SizedBox(height: 8),
-                                    // Author & Tanggal
-                                    Row(
-                                      children: [
-                                        Icon(Icons.person_outline, size: 14, color: Colors.grey),
-                                        SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            item.author,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                                          ),
-                                        ),
-                                        Text("• ", style: TextStyle(fontSize: 11, color: Colors.grey[600])),
-                                        Text(
-                                          "${item.publishTime.day}/${item.publishTime.month}",
-                                          style: TextStyle(fontSize: 11, color: Colors.grey[600])
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: ClipRect(
+        child: Container(
+          height: 70,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withValues(alpha: 0.75),
+                Colors.white.withValues(alpha: 0.7),
+                Colors.white.withValues(alpha: 0.1),
+                Colors.white.withValues(alpha: 0.0),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

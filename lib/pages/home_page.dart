@@ -30,7 +30,136 @@ class _HomePageState extends State<HomePage> {
   );
   int _currentPage = 0;
   Timer? _timer;
-  List<News>? _newsCache;
+  List<News>? _newsCache; 
+
+  final supabase = Supabase.instance.client; 
+
+  // --- LOGIC: Popup Detail Berita ---
+  void _showNewsDetail(BuildContext context, News item) {
+    final String imageUrl = item.imageUrl; 
+    final String userImageUrl = item.userImageUrl; 
+    debugPrint(imageUrl); 
+    debugPrint(userImageUrl); 
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Biar tinggi sheet fleksibel
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.9, // Tinggi 90% layar
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Handle (Garis Swipe)
+              Center(
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 12),
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              // Konten Detail
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Gambar Besar di Popup
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: imageUrl.isNotEmpty
+                            ? Image.network(
+                                imageUrl,
+                                width: double.infinity,
+                                height: 220,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => 
+                                    Container(height: 220, color: Colors.grey[200], child: Icon(Icons.broken_image, color: Colors.grey)),
+                              )
+                            : Container(height: 220, color: Colors.grey[200], child: Icon(Icons.image, color: Colors.grey)),
+                      ),
+                      SizedBox(height: 20),
+                      
+                      // Chip Kategori
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          item.category,
+                          style: TextStyle(color: Colors.blue[800], fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      ),
+                      SizedBox(height: 12),
+
+                      // Judul
+                      Text(item.title, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 1.3)),
+                      SizedBox(height: 8),
+
+                      // Info Author & Tanggal
+                      Row(
+                        children: [
+                          Container(
+                            height: 25,
+                            width: 25,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[200],
+                            ),
+                            child: ClipOval(
+                              child: userImageUrl.isNotEmpty
+                                  ? Image.network(
+                                      userImageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          Icon(Icons.person, size: 18, color: Colors.grey),
+                                    )
+                                  : Icon(Icons.person, size: 18, color: Colors.grey),
+                            ),
+                          ),
+
+                          SizedBox(width: 8),
+                          Text(item.author, style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          SizedBox(width: 15),
+                          Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text(
+                            "${item.publishTime.day}/${item.publishTime.month}/${item.publishTime.year}",
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                      
+                      Divider(height: 40, thickness: 1),
+
+                      // Isi Berita
+                      Text(
+                        item.content.isNotEmpty ? item.content : "Tidak ada konten berita.",
+                        style: TextStyle(fontSize: 16, height: 1.8, color: Colors.black87),
+                        textAlign: TextAlign.justify,
+                      ),
+                      SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -90,7 +219,7 @@ Future<void> _getUserProgress() async {
             'last_active_date': todayStr,
           }, onConflict: 'user_id');
           
-          print("Streak berhasil di-update ke: $currentStreak");
+          // print("Streak berhasil di-update ke: $currentStreak");
         }
 
 final rankResponse = await supabase
@@ -115,9 +244,9 @@ final rankResponse = await supabase
               
               final rankData = rankResponse['ranks'];
               if (rankData != null) {
-                final int rankId = rankData['id']; 
+                final int rankId = rankData['id'] ?? 0; 
                 final String fetchedRankName = rankData['name'];
-                final int rankMaxPoint = rankData['max_points'];
+                final int rankMaxPoint = rankData['max_points'] ?? 10000;
 
                 _rankName = fetchedRankName; 
 
@@ -186,29 +315,14 @@ final rankResponse = await supabase
 
       final response = await supabase
           .from('news')
-          .select('id, author, title, image_url, content, publishTime, userpicture')
+          .select('id, author, title, image_url, content, publishTime, userpicture, category')
           .order('id', ascending: false)
           .limit(3);
 
       final List<dynamic> data = response;
 
-      const bucket = 'aquaverse';
-      const folderPrefix = 'assets/images/news';
-
       return data.map((row) {
         final map = Map<String, dynamic>.from(row as Map);
-        String file = (map['image_url'] ?? '').toString();
-
-        if (file.isNotEmpty && !file.startsWith('http')) {
-          String filePath;
-          if (file.contains(folderPrefix)) {
-            filePath = file;
-          } else {
-            filePath = '$folderPrefix/$file';
-          }
-          map['image_url'] = supabase.storage.from(bucket).getPublicUrl(filePath);
-        }
-
         return News.fromJson(map);
       }).toList();
     } catch (e) {
@@ -424,11 +538,17 @@ final rankResponse = await supabase
                                   controller: _pageController,
                                   itemCount: snapshot.data!.length,
                                   onPageChanged: (index) => setState(() => _currentPage = index),
+                                  
                                   itemBuilder: (context, index) {
                                     final news = snapshot.data![index];
+                                    
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                      child: LatestNewsTile(news: news),
+                                      child: InkWell(
+                                        onTap: () => _showNewsDetail(context, news), 
+                                        borderRadius: BorderRadius.circular(16), 
+                                        child: LatestNewsTile(news: news),
+                                      ),
                                     );
                                   },
                                 ),
@@ -554,7 +674,7 @@ final rankResponse = await supabase
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
+                              color: Colors.black.withValues(alpha: 0.15),
                               offset: const Offset(0, 4),
                               blurRadius: 8,
                             )
@@ -582,7 +702,7 @@ final rankResponse = await supabase
                                     width: 150,
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: Colors.white.withValues(alpha: 0.5),
                                       borderRadius: BorderRadius.circular(5),
                                     ),
                                   ),

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../class/news_class.dart';
+import '../class/news_class.dart'; 
 
 class LatestNewsTile extends StatelessWidget {
-  final News news;
+  final News news; 
 
   const LatestNewsTile({super.key, required this.news});
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       width: 280, 
       decoration: BoxDecoration(
@@ -80,14 +81,12 @@ class LatestNewsTile extends StatelessWidget {
                         color: Colors.grey[200], // Background buat yg anonim
                       ),
                       child: ClipOval(
-                        child: news.userpicture.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: news.userpicture,
+                        child: CachedNetworkImage(
+                                imageUrl: news.userImageUrl,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Container(color: Colors.grey[200]),
                                 errorWidget: (context, url, error) => Icon(Icons.person, size: 16, color: Colors.grey),
                               )
-                            : Icon(Icons.person, size: 16, color: Colors.grey), // Icon Anonim
                       ),
                     ),
                     

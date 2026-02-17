@@ -1,48 +1,45 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 class News {
-  final String imageUrl;
-  final String author;
+  final String id;
   final String title;
-  final String category;
-  final DateTime publishTime;
   final String content;
-  final String userpicture;
+  final String imageUrl; 
+  final String userImageUrl; 
+  final String author; 
+  final DateTime publishTime; 
+  final String category; 
 
   News({
-    required this.imageUrl,
-    required this.author,
+    required this.id,
     required this.title,
-    required this.category,
-    required this.publishTime,
     required this.content,
-    required this.userpicture,
+    required this.imageUrl,
+    required this.userImageUrl, 
+    required this.author, 
+    required this.category, 
+    required this.publishTime, 
   });
 
   factory News.fromJson(Map<String, dynamic> json) {
-    // Helper function buat handle tanggal biar gak crash
-    DateTime safeTime() {
-      // Prioritas 1: Cek publishTime (sesuai query lu)
-      if (json['publishTime'] != null) {
-        return DateTime.tryParse(json['publishTime'].toString()) ?? DateTime.now();
-      }
-      // Prioritas 2: Cek published_at (standard supabase)
-      if (json['published_at'] != null) {
-        return DateTime.tryParse(json['published_at'].toString()) ?? DateTime.now();
-      }
-      // Prioritas 3: Cek created_at
-      if (json['created_at'] != null) {
-        return DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now();
-      }
-      return DateTime.now();
-    }
+    final supabase = Supabase.instance.client;
+
+    final String newsImageFileName = json['image_url'] ?? '';
+    final String userImageFileName = json['userpicture'] ?? '';
 
     return News(
-      title: (json['title'] ?? 'No Title').toString(),
-      author: (json['author'] ?? 'Admin').toString(),
-      content: (json['content'] ?? '').toString(),
-      category: (json['category'] ?? 'Berita').toString(),
-      imageUrl: (json['image_url'] ?? '').toString(),
-      userpicture: (json['userpicture'] ?? '').toString(),
-      publishTime: safeTime(),
+      id: json['id'].toString(),
+      title: json['title'].toString(),
+      content: json['content'].toString(),
+      imageUrl: newsImageFileName.isNotEmpty
+          ? supabase.storage.from('aquaverse').getPublicUrl('assets/images/news/$newsImageFileName')
+          : '',
+      userImageUrl: userImageFileName.isNotEmpty
+          ? supabase.storage.from('aquaverse').getPublicUrl('assets/images/news/$userImageFileName')
+          : '', 
+      author: json['author'].toString(), 
+      category: json['category'].toString(), 
+      publishTime: DateTime.parse(json['publishTime']) 
     );
   }
 }

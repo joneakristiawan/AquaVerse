@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// Pastikan path ini sesuai sama lokasi file class lu
 import '../class/news_class.dart'; 
 import 'package:intl/intl.dart'; 
 import 'dart:async'; // untuk Timer 
@@ -14,12 +13,15 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   // Config storage sesuai settings Supabase lu
-  final String _storageBucket = 'aquaverse';
-  final String _storageFolder = 'assets/images/news';
   final supabase = Supabase.instance.client; 
 
   // --- LOGIC: Popup Detail Berita ---
   void _showNewsDetail(BuildContext context, News item) {
+    final String imageUrl = item.imageUrl; 
+    final String userImageUrl = item.userImageUrl; 
+    debugPrint(imageUrl); 
+    debugPrint(userImageUrl); 
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true, // Biar tinggi sheet fleksibel
@@ -55,9 +57,9 @@ class _NewsPageState extends State<NewsPage> {
                       // Gambar Besar di Popup
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: item.imageUrl.isNotEmpty
+                        child: imageUrl.isNotEmpty
                             ? Image.network(
-                                item.imageUrl,
+                                imageUrl,
                                 width: double.infinity,
                                 height: 220,
                                 fit: BoxFit.cover,
@@ -89,12 +91,30 @@ class _NewsPageState extends State<NewsPage> {
                       // Info Author & Tanggal
                       Row(
                         children: [
-                          Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
+                          Container(
+                            height: 25,
+                            width: 25,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey[200],
+                            ),
+                            child: ClipOval(
+                              child: userImageUrl.isNotEmpty
+                                  ? Image.network(
+                                      userImageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          Icon(Icons.person, size: 18, color: Colors.grey),
+                                    )
+                                  : Icon(Icons.person, size: 18, color: Colors.grey),
+                            ),
+                          ),
+
+                          SizedBox(width: 8),
                           Text(item.author, style: TextStyle(color: Colors.grey, fontSize: 12)),
-                          SizedBox(width: 10),
+                          SizedBox(width: 15),
                           Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
+                          SizedBox(width: 8),
                           Text(
                             "${item.publishTime.day}/${item.publishTime.month}/${item.publishTime.year}",
                             style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -136,18 +156,15 @@ class _NewsPageState extends State<NewsPage> {
       final response = query.isEmpty
           ? await supabase.from('news').select().order('publishTime', ascending: false)
           : await supabase.from('news').select().ilike('title', '%${query.trim()}%').order('publishTime', ascending: false);
-
-      if (response.isEmpty) {
-        debugPrint("Response kosong");
-      } else {
-        for (var item in response) {
-          debugPrint("Cek URL image: ${item['image_url']}");
-        }
-      }
+      
+      debugPrint("RAW RESPONSE:");
+      debugPrint(response.toString());
 
       final news = (response as List)
           .map((item) => News.fromJson(item))
           .toList();
+      
+      if(!mounted) return; 
 
       setState(() {
         _newsList = news;
@@ -155,6 +172,7 @@ class _NewsPageState extends State<NewsPage> {
       });
     } catch (e) {
       debugPrint("Error fetch news: $e");
+      if(!mounted) return; 
       setState(() => _isLoading = false);
     }
   }
@@ -228,7 +246,9 @@ class _NewsPageState extends State<NewsPage> {
                       onChanged: (value) {
                         if (_debounce?.isActive ?? false) _debounce!.cancel();
                           _debounce = Timer(const Duration(milliseconds: 500), () {
-                            _searchQuery = value; 
+                            setState(() {
+                              _searchQuery = value; 
+                            });
                             _fetchNews(query: value);
                           });
                       },
@@ -260,13 +280,13 @@ class _NewsPageState extends State<NewsPage> {
 
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.only(top: 170),
+              padding: EdgeInsets.only(top: 160),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start, 
                   children: [
+                    const SizedBox(height: 10,),  
 
-              
                     if(!isSearching)...[
                         Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -300,33 +320,47 @@ class _NewsPageState extends State<NewsPage> {
                           padding: EdgeInsets.all(24),
                           child: CircularProgressIndicator(),
                         ),
-                      )
+                      ),
                     
-                    else if (_newsList.isEmpty) 
+                    if (isSearching && _newsList.isEmpty) 
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(24),
-                          child: Text("Belum ada berita."),
+                          child: Text("Tidak ada berita yang sesuai!"),
                         ),
-                      )
-                    else 
+                      ), 
+
+                    if(isSearching)...[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: const Text("Hasil Pencarian", style: TextStyle(
+                          fontSize: 28, 
+                          fontFamily: 'Montserrat',
+                          height: 1.4,
+                          fontWeight: FontWeight.bold, 
+                          color: Color.fromRGBO(63, 68, 102, 1), 
+                        ),), 
+                      ),
+                        
+                      Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20), 
+                          child: Text('Untuk: $_searchQuery', style: TextStyle(
+                            fontSize: 22, 
+                            fontFamily: 'Montserrat',
+                            height: 1.0,
+                            fontWeight: FontWeight.bold, 
+                            color: Colors.black
+                          ),),
+                      ),
+                    ],
+
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 20),
                       itemCount: _newsList.length,
                       itemBuilder: (context, index) {
-                        final item = _newsList[index];
-
-                        final userImagePlaceholder = item.userpicture;
-                        final userImageUrl = supabase.storage
-                            .from(_storageBucket)
-                            .getPublicUrl('$_storageFolder/$userImagePlaceholder');
-
-                        final newsImagePlaceholder = item.imageUrl; 
-                        final newsImageUrl = supabase.storage
-                          .from(_storageBucket)
-                          .getPublicUrl('assets/images/news/$newsImagePlaceholder'); 
+                        final item = _newsList[index]; 
 
                         final monthShort =
                             DateFormat('MMMM', 'id_ID').format(item.publishTime);
@@ -353,7 +387,7 @@ class _NewsPageState extends State<NewsPage> {
                                     
                                     child: item.imageUrl.isNotEmpty
                                         ? Image.network(
-                                            newsImageUrl,
+                                            item.imageUrl,
                                             width: 90,
                                             height: 90,
                                             fit: BoxFit.cover,
@@ -411,7 +445,7 @@ class _NewsPageState extends State<NewsPage> {
                                               decoration: BoxDecoration(
                                                 borderRadius: BorderRadius.circular(100),
                                                 image: DecorationImage(
-                                                  image: NetworkImage(userImageUrl),
+                                                  image: NetworkImage(item.userImageUrl),
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),

@@ -144,9 +144,11 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   List<News> _newsList = []; 
+  List<News> _allNews = [];
   bool _isLoading = false; 
   String _searchQuery = ''; 
   Timer? _debounce; 
+  String _selectedCategory = 'SEMUA'; 
 
   bool get isSearching => _searchQuery.isNotEmpty;
 
@@ -175,13 +177,18 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> _fetchNews({String query = ''}) async {
     setState(() => _isLoading = true);
+    
     try {
-      final response = query.isEmpty
-          ? await supabase.from('news').select().order('publishTime', ascending: false)
-          : await supabase.from('news').select().ilike('title', '%${query.trim()}%').order('publishTime', ascending: false);
-      
-      debugPrint("RAW RESPONSE:");
-      debugPrint(response.toString());
+      var request = supabase.from('news').select();
+
+      if (_selectedCategory != 'SEMUA') {
+        request = request.eq('category', _selectedCategory);
+      }
+      if (query.isNotEmpty) {
+        request = request.ilike('title', '%${query.trim()}%');
+      }
+
+      final response = await request.order('publishTime', ascending:false); 
 
       final news = (response as List)
           .map((item) => News.fromJson(item))
@@ -190,6 +197,7 @@ class _NewsPageState extends State<NewsPage> {
       if(!mounted) return; 
 
       setState(() {
+        _allNews = news; 
         _newsList = news;
         _isLoading = false;
       });
@@ -200,7 +208,7 @@ class _NewsPageState extends State<NewsPage> {
     }
   }
 
-    final PageController _pageController = PageController(
+  final PageController _pageController = PageController(
     viewportFraction: 0.88,
   );
   int _currentPage = 0;
@@ -225,6 +233,63 @@ class _NewsPageState extends State<NewsPage> {
       }
     });
   }
+
+  void _applyFilter() {
+    List<News> filtered = _allNews; 
+
+    if(_selectedCategory != 'SEMUA'){
+      filtered = filtered.where((item) => item.category == _selectedCategory).toList(); 
+    }
+
+    if(_searchQuery.isNotEmpty){
+      filtered = filtered.where((item) => item.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList(); 
+    }
+
+    setState(() {
+      _newsList = filtered; 
+    });
+  }
+
+  Widget _buildCategoryChip(String category){
+    final bool isSelected = _selectedCategory == category; 
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: ChoiceChip(
+        label: Text(
+          category[0] + category.substring(1).toLowerCase(),
+          style: TextStyle(
+            fontSize: 13, 
+            fontFamily: 'Afacad', 
+            color: Colors.black, 
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w400, 
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (_) {
+          setState(() {
+            _selectedCategory = category;
+          });
+          _applyFilter(); 
+        },
+        backgroundColor: Colors.grey[200], 
+        selectedColor: const Color.fromRGBO(217, 246, 252, 1),
+        elevation: isSelected? 1 : 0, 
+        pressElevation: 2, 
+
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), 
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadiusGeometry.circular(10), 
+          side: BorderSide(
+            color: isSelected 
+              ? const Color.fromRGBO(217, 246, 252, 1) 
+              : Colors.transparent 
+          )
+        ),
+      ),
+    );
+  } 
 
   @override
   void initState(){
@@ -364,6 +429,8 @@ class _NewsPageState extends State<NewsPage> {
                         ),),
                       ),
 
+                      const SizedBox(height: 10,), 
+
                       SizedBox(
                       height: 280, 
                       child: FutureBuilder<List<News>>(
@@ -475,139 +542,159 @@ class _NewsPageState extends State<NewsPage> {
                         ), 
                       ), 
 
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 20),
-                      itemCount: _newsList.length,
-                      itemBuilder: (context, index) {
-                        final item = _newsList[index]; 
+                      if(_newsList.isNotEmpty)...[
+                        const SizedBox(height: 15,), 
 
-                        final monthShort =
-                            DateFormat('MMMM', 'id_ID').format(item.publishTime);
+                        SizedBox(
+                          height: 45, 
+                          child: ListView(
+                            scrollDirection: Axis.horizontal, 
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            children: [
+                              _buildCategoryChip('SEMUA'), 
+                              _buildCategoryChip('PENEMUAN'), 
+                              _buildCategoryChip('KONSERVASI'), 
+                              _buildCategoryChip('RISET'), 
+                            ],
+                          ), 
+                        ), 
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          elevation: 3,
-                          shadowColor: Colors.blue.withValues(alpha: 0.1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          color: Colors.white,
-                          child: InkWell(
-                            onTap: () => _showNewsDetail(context, item),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // IMAGE
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    
-                                    child: item.imageUrl.isNotEmpty
-                                        ? Image.network(
-                                            item.imageUrl,
-                                            width: 90,
-                                            height: 90,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) =>
-                                                Container(
+                        const SizedBox(height: 5,), 
+                      ], 
+
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 20),
+                        itemCount: _newsList.length,
+                        itemBuilder: (context, index) {
+                          final item = _newsList[index]; 
+
+                          final monthShort =
+                              DateFormat('MMMM', 'id_ID').format(item.publishTime);
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            elevation: 3,
+                            shadowColor: Colors.blue.withValues(alpha: 0.1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            color: Colors.white,
+                            child: InkWell(
+                              onTap: () => _showNewsDetail(context, item),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // IMAGE
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      
+                                      child: item.imageUrl.isNotEmpty
+                                          ? Image.network(
+                                              item.imageUrl,
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) =>
+                                                  Container(
+                                                width: 90,
+                                                height: 90,
+                                                color: Colors.grey[200],
+                                                child: const Icon(Icons.broken_image,
+                                                    color: Colors.grey),
+                                              ),
+                                            )
+                                          : Container(
                                               width: 90,
                                               height: 90,
                                               color: Colors.grey[200],
-                                              child: const Icon(Icons.broken_image,
-                                                  color: Colors.grey),
+                                              child:
+                                                  const Icon(Icons.image, color: Colors.grey),
                                             ),
-                                          )
-                                        : Container(
-                                            width: 90,
-                                            height: 90,
-                                            color: Colors.grey[200],
-                                            child:
-                                                const Icon(Icons.image, color: Colors.grey),
-                                          ),
-                                  ),
-                                  const SizedBox(width: 16),
+                                    ),
+                                    const SizedBox(width: 16),
 
-                                  // CONTENT
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.category,
-                                          style: TextStyle(
-                                            color: Colors.black.withValues(alpha: 0.5),
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
+                                    // CONTENT
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.category,
+                                            style: TextStyle(
+                                              color: Colors.black.withValues(alpha: 0.5),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 4),
+                                          const SizedBox(height: 4),
 
-                                        Text(
-                                          item.title,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                            color: Colors.black87,
+                                          Text(
+                                            item.title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                              color: Colors.black87,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 8),
+                                          const SizedBox(height: 8),
 
-                                        Row(
-                                          children: [
-                                            Container(
-                                              height: 22,
-                                              width: 22,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(100),
-                                                image: DecorationImage(
-                                                  image: NetworkImage(item.userImageUrl),
-                                                  fit: BoxFit.cover,
+                                          Row(
+                                            children: [
+                                              Container(
+                                                height: 22,
+                                                width: 22,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(100),
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(item.userImageUrl),
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 8),
+                                              const SizedBox(width: 8),
 
-                                            Expanded(
-                                              child: Text(
-                                                item.author,
-                                                overflow: TextOverflow.ellipsis,
+                                              Expanded(
+                                                child: Text(
+                                                  item.author,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      fontSize: 11,
+                                                      color: Colors.grey[600]),
+                                                ),
+                                              ),
+
+                                              Text(
+                                                "| ",
                                                 style: TextStyle(
                                                     fontSize: 11,
                                                     color: Colors.grey[600]),
                                               ),
-                                            ),
 
-                                            Text(
-                                              "| ",
-                                              style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: Colors.grey[600]),
-                                            ),
-
-                                            Text(
-                                              "${item.publishTime.day} $monthShort",
-                                              style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: Colors.grey[600]),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                              Text(
+                                                "${item.publishTime.day} $monthShort",
+                                                style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: Colors.grey[600]),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ), 
+                          );
+                        },
+                      ), 
                   ],
                 ),
               ),

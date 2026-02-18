@@ -20,8 +20,6 @@ class _NewsPageState extends State<NewsPage> {
   void _showNewsDetail(BuildContext context, News item) {
     final String imageUrl = item.imageUrl; 
     final String userImageUrl = item.userImageUrl; 
-    debugPrint(imageUrl); 
-    debugPrint(userImageUrl); 
 
     showModalBottomSheet(
       context: context,

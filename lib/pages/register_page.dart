@@ -18,60 +18,73 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isLoading = false;
 
   Future<void> _register() async {
-    if (_usernameController.text.isEmpty) {
-      _showError('Username tidak boleh kosong!');
-      return;
-    } else if (_nameController.text.isEmpty) {
-      _showError('Nama tidak boleh kosong!');
-      return;
-    } else if (_emailController.text.isEmpty) {
-      _showError('E-mail tidak boleh kosong!');
-      return;
-    } else if (_passwordController.text.isEmpty) {
-      _showError('Password tidak boleh kosong');
-      return;
-    } else if (_passwordController.text.length < 6) {
-      _showError('Password tidak valid! Password minimal 6 karakter!');
-      return;
-    }
+  final username = _usernameController.text.trim();
+  final name = _nameController.text.trim();
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
 
-    setState(() => _isLoading = true);
-
-    try {
-      await supabase.auth.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-        data: {
-          'username': _usernameController.text.trim(),
-          'name': _nameController.text.trim(),
-        },
-      );
-
-      if (!mounted) return;
-
-      Navigator.pop(context, _emailController.text.trim());
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
-      );
-    } on AuthException catch (e) {
-      if (e.message.toLowerCase().contains('username')) {
-        _showError('Username sudah digunakan!');
-        return;
-      } else {
-        _showError(e.message);
-        return;
-      }
-      // if(!mounted) return;
-      // _showError(e.toString());
-    } catch (e) {
-      _showError('Terjadi kesalahan. Silakan coba lagi.');
-      return;
-    } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-    }
+  if (username.isEmpty || name.isEmpty || email.isEmpty || password.isEmpty) {
+    _showError('Semua field harus diisi!');
+    return;
+  } else if (password.length < 6) {
+    _showError('Password minimal 6 karakter!');
+    return;
   }
+
+  setState(() => _isLoading = true);
+
+  try {
+    final res = await supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: {'username': username, 'name': name},
+    );
+
+    if (res.user == null) {
+      _showError('Registrasi gagal. Email mungkin sudah digunakan.');
+      return;
+    }
+
+    final userId = res.user!.id;
+
+    // Insert ke profiles
+    try {
+      await supabase.from('profiles').insert({
+        'id': userId,
+        'username': username,
+        'name': name,
+        'email': email,
+      });
+    } catch (e) {
+      _showError('Gagal menyimpan profil: $e');
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.pop(context, email);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Registrasi berhasil! Silakan login.')),
+    );
+
+  } on AuthException catch (e) {
+    if (e.message.toLowerCase().contains('already registered')) {
+      _showError('Email sudah terdaftar!');
+    } else if (e.message.toLowerCase().contains('username')) {
+      _showError('Username sudah digunakan!');
+    } else {
+      _showError(e.message);
+    }
+  } catch (e, st) {
+    debugPrint('Error registrasi: $e');
+    debugPrint('Stack trace: $st');
+    _showError('Terjadi kesalahan jaringan atau server: $e');
+  } finally {
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+  }
+}
+
 
   void _showError(String message) {
     ScaffoldMessenger.of(

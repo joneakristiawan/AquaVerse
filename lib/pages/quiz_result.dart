@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'quiz_fill.dart'; 
 import 'display_page.dart'; 
+import '../class_service/quest_service.dart';
 
 class QuizResult extends StatefulWidget {
   final int totalQuestions;
@@ -61,6 +62,13 @@ class _QuizResultState extends State<QuizResult> {
     } catch (e, st) {
       debugPrint('Gagal menambahkan poin!: $e');
       debugPrint('$st');
+    }
+
+    try {
+      await QuestService().trackPlayQuiz();
+      debugPrint('Daily Quest Quiz berhasil di-update!');
+    } catch (e) {
+      debugPrint('Gagal update daily quest: $e');
     }
   }
 

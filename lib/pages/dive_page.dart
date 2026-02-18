@@ -9,6 +9,7 @@ import '../image/fish_sprite.dart';
 import '../image/image_url_cache.dart';
 import 'biota_info_sheet.dart';
 import 'biota_list_page.dart';
+import '../class_service/quest_service.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -371,7 +372,10 @@ class _DivePageState extends State<DivePage> with TickerProviderStateMixin {
       _scanCtrl.stop();
       setState(() {
         _isScanning = false;
-        _scannedIds.add(id);
+        if (!_scannedIds.contains(id)){
+          _scannedIds.add(id);
+          QuestService().trackScanFish();
+        }
       });
     });
   }

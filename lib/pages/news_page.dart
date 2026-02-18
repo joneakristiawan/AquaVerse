@@ -4,6 +4,7 @@ import '../class/news_class.dart';
 import 'package:intl/intl.dart'; 
 import 'dart:async'; // untuk Timer 
 import '../components/latestnewstile.dart'; 
+import '../class_service/quest_service.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key}); 
@@ -18,6 +19,7 @@ class _NewsPageState extends State<NewsPage> {
 
   // --- LOGIC: Popup Detail Berita ---
   void _showNewsDetail(BuildContext context, News item) {
+    QuestService().trackReadNews();
     final String imageUrl = item.imageUrl; 
     final String userImageUrl = item.userImageUrl; 
 

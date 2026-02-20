@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Jangan lupa import Supabase
 
 import '/pages/login_page.dart'; 
+import '/pages/display_page.dart'; // Import halaman utama lu juga
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,18 +32,31 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await Future.delayed(const Duration(milliseconds: 1500));
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LoginPage(), 
-      ),
-    );
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const DisplayPage(), 
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginPage(), 
+        ),
+      );
+    }
+    // -------------------------------------
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(105, 202, 249, 1), 
+      backgroundColor: const Color.fromRGBO(105, 202, 249, 1), 
       body: SizedBox(
         height: double.infinity,
         child: Stack(
@@ -50,10 +65,9 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Center(
               child: AnimatedScale(
-                duration: Duration(milliseconds: 600),
-                curve: Cubic(0.58, -0.30, 0.365, 1),
+                duration: const Duration(milliseconds: 600),
+                curve: const Cubic(0.58, -0.30, 0.365, 1),
                 scale: _isScalTheCircle ? 10 : 1,
-
                 child: CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.white,
@@ -62,21 +76,21 @@ class _SplashScreenState extends State<SplashScreen> {
                       radius: 20,
                       backgroundColor: _isScalTheCircle
                           ? Colors.white
-                          : Color.fromRGBO(105, 202, 249, 1), 
+                          : const Color.fromRGBO(105, 202, 249, 1), 
                     ),
                   ),
                 ),
               ),
             ),
             AnimatedPositioned(
-              duration: Duration(milliseconds: 1100),
-              curve: Cubic(.47, -1.26, .36, 1),
+              duration: const Duration(milliseconds: 1100),
+              curve: const Cubic(.47, -1.26, .36, 1),
               left:
                   (MediaQuery.of(context).size.width / 2) -
                   40 -
                   (_isDotCenter ? -20 : 80),
 
-              child: CircleAvatar(radius: 20, backgroundColor: Colors.white),
+              child: const CircleAvatar(radius: 20, backgroundColor: Colors.white),
             ),
           ],
         ),

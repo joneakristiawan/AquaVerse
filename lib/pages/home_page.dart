@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../class/news_class.dart';
 import '../../components/latestnewstile.dart';
 import '../class_service/quest_service.dart';
-import '../class/googlemaps_api.dart';
+import '../class/geopify_api.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int)? onTabChange;
@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String userName = "Diver";
   String _rankName = "Shore Beginner";
+  String? _currentBadgeUrl;
 
   int _streak = 0;
   int _points = 0;
@@ -222,7 +223,8 @@ class _HomePageState extends State<HomePage> {
                 id,
                 name,
                 min_points, 
-                max_points
+                max_points,
+                image_url
               )
             ''')
             .eq('user_id', user.id)
@@ -266,6 +268,13 @@ class _HomePageState extends State<HomePage> {
                 final String fetchedRankName = rankData['name'];
                 final int rankMinPoint = rankData['min_points'] ?? 0;
                 final int rankMaxPoint = rankData['max_points'] ?? 10000;
+
+                final String? imageFile = rankData['image_url'];
+                if (imageFile != null) {
+                  _currentBadgeUrl = supabase.storage
+                      .from('aquaverse')
+                      .getPublicUrl('assets/images/ranks/$imageFile');
+                }
 
                 _rankName = fetchedRankName; 
 
@@ -449,19 +458,32 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Row(
                             children: [
-                              const CircleAvatar(
-                                radius: 30,
-                                backgroundColor: Color.fromARGB(255, 255, 255, 255),
-                                child: CircleAvatar(
-                                  radius: 26,
-                                  backgroundColor: Color.fromARGB(255, 223, 223, 223),
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 30,
-                                    color: Color.fromARGB(255, 93, 93, 93),
-                                  ),
-                                ),
-                              ),
+                              _currentBadgeUrl != null
+                                  ? Container(
+                                      width: 80,
+                                      height: 80,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color.fromARGB(0, 255, 255, 255),
+                                        image: DecorationImage(
+                                          image: NetworkImage(_currentBadgeUrl!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
+                                  : const CircleAvatar(
+                                      radius: 30,
+                                      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+                                      child: CircleAvatar(
+                                        radius: 26,
+                                        backgroundColor: Color.fromARGB(255, 223, 223, 223),
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 30,
+                                          color: Color.fromARGB(255, 93, 93, 93),
+                                        ),
+                                      ),
+                                    ),
                               const SizedBox(width: 16),
                               
                               Expanded(

@@ -19,7 +19,7 @@ import 'pages/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   await Supabase.initialize(url: DBKey.url, anonKey: DBKey.anonKey); 
   await initializeDateFormatting('id_ID', ''); 
 

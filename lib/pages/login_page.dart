@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      await supabase.auth.signOut();
+      // await supabase.auth.signOut();
 
       String emailToLogin = input;
 

@@ -789,11 +789,10 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    // WIDGET LOCATION CARD (Perbaikan tombol Selam Sekarang)
                     LocationCard(
                       onDiveNow: () {
                         if (widget.onTabChange != null) {
-                          widget.onTabChange!(2); // Pindah ke Tab Dive (Index 2)
+                          widget.onTabChange!(2);
                         }
                       },
                     ),

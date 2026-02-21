@@ -100,8 +100,9 @@ class _BiotaInfoDialogState extends State<_BiotaInfoDialog> {
       }
     } catch (e) {
       debugPrint("Error toggle favorite: $e");
-      if (mounted)
+      if (mounted) {
         setState(() => _isFavorited = wasFavorited); // Revert jika gagal
+      }
     }
   }
 
@@ -257,6 +258,7 @@ class _Content extends StatelessWidget {
                         decoration: TextDecoration.underline,
                         decorationColor: Colors.blueAccent,
                         decorationThickness: 1,
+                        fontFamily: 'Montserrat'
                       ),
                     ),
                     if (latin.isNotEmpty) ...[
@@ -270,6 +272,7 @@ class _Content extends StatelessWidget {
                           fontStyle: FontStyle.italic,
                           fontSize: 12,
                           decoration: TextDecoration.none,
+                          fontFamily: 'Montserrat'
                         ),
                       ),
                     ],
@@ -377,7 +380,8 @@ class _Content extends StatelessWidget {
                         'Belum ada informasi tambahan untuk biota ini.',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.80),
-                          decoration: TextDecoration.none,
+                          decoration: TextDecoration.none, 
+                          fontFamily: 'Montserrat'
                         ),
                       ),
                     ),
@@ -404,7 +408,7 @@ class _Content extends StatelessWidget {
               ),
               child: const Text(
                 'Tutup',
-                style: TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(fontWeight: FontWeight.w800, fontFamily: 'Montserrat'),
               ),
             ),
           ),
@@ -451,6 +455,7 @@ class _Section extends StatelessWidget {
                     decoration: TextDecoration.underline,
                     decorationColor: Colors.blueAccent,
                     decorationThickness: 2,
+                    fontFamily: 'Montserrat'
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -460,7 +465,8 @@ class _Section extends StatelessWidget {
                     color: Colors.white.withOpacity(0.86),
                     decoration: TextDecoration.none,
                     height: 1.35,
-                    fontSize: 12.5,
+                    fontSize: 12.5, 
+                    fontFamily: 'Afacad'
                   ),
                 ),
               ],
@@ -506,6 +512,7 @@ class _StatPill extends StatelessWidget {
                     color: Colors.white.withOpacity(0.75),
                     fontSize: 11.5,
                     fontWeight: FontWeight.w700,
+                    fontFamily: 'Afacad'
                   ),
                 ),
                 TextSpan(
@@ -544,6 +551,7 @@ class _LoadingView extends StatelessWidget {
             color: Colors.white.withOpacity(0.85),
             fontSize: 14,
             decoration: TextDecoration.none,
+            fontFamily: 'Montserrat'
           ),
         ),
       ],
@@ -569,6 +577,7 @@ class _ErrorBox extends StatelessWidget {
           style: TextStyle(
             color: Colors.white.withOpacity(0.90),
             decoration: TextDecoration.none,
+            fontFamily: 'Montserrat'
           ),
         ),
         const SizedBox(height: 12),
@@ -586,7 +595,7 @@ class _ErrorBox extends StatelessWidget {
                 side: BorderSide(color: Colors.white.withOpacity(0.22)),
               ),
             ),
-            child: const Text('Tutup'),
+            child: const Text('Tutup', style: TextStyle(fontFamily: 'Montserrat'),),
           ),
         ),
       ],

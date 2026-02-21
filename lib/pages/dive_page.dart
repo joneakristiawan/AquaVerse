@@ -516,6 +516,7 @@ class _DivePageState extends State<DivePage> with TickerProviderStateMixin {
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 1.2,
+                            fontFamily: 'Montserrat'
                           ),
                         ),
                       ),
@@ -1374,6 +1375,7 @@ class _BiotaRealOverlaySheet extends StatelessWidget {
                                 decoration: TextDecoration.underline,
                                 decorationColor: Colors.blueAccent,
                                 decorationThickness: 1,
+                                fontFamily: 'Montserrat'
                               ),
                             ),
                           ),
@@ -1424,7 +1426,7 @@ class _BiotaRealOverlaySheet extends StatelessWidget {
                           ),
                           child: const Text(
                             'Lihat informasi',
-                            style: TextStyle(fontWeight: FontWeight.w700),
+                            style: TextStyle(fontWeight: FontWeight.w700, fontFamily: 'Montserrat'),
                           ),
                         ),
                       ),

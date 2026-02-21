@@ -18,8 +18,7 @@ class QuestService {
           .maybeSingle();
 
       // Kalau belum ada data hari ini, insert baris baru (Trigger DB akan isi target random)
-      if (data == null) {
-        data = await supabase
+      data ??= await supabase
             .from('daily_quests')
             .insert({
               'user_id': user.id,
@@ -27,7 +26,6 @@ class QuestService {
             })
             .select()
             .single();
-      }
 
       return data;
     } catch (e) {

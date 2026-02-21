@@ -215,8 +215,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               prefixIcon: Icons.person_outline,
                               validator: (v) {
                                 final s = (v ?? '').trim();
-                                if (s.isEmpty)
+                                if (s.isEmpty) {
                                   return 'Username tidak boleh kosong';
+                                }
                                 if (s.length < 3) return 'Minimal 3 karakter';
                                 return null;
                               },
@@ -248,10 +249,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               enabled: false,
                               validator: (v) {
                                 final s = (v ?? '').trim();
-                                if (s.isEmpty)
+                                if (s.isEmpty) {
                                   return 'Email tidak boleh kosong';
-                                if (!s.contains('@'))
+                                }
+                                if (!s.contains('@')) {
                                   return 'Format email tidak valid';
+                                }
                                 return null;
                               },
                             ),

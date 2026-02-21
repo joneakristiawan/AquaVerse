@@ -295,8 +295,9 @@ class _HomePageState extends State<HomePage> {
                 }
 
                 String nextRankImage;
-                if(rankId == 1) nextRankImage = 'rank_2_star_voyager.png';
-                else if(rankId == 2) nextRankImage = 'rank_3_apex_swimmer.png';
+                if(rankId == 1) {
+                  nextRankImage = 'rank_2_star_voyager.png';
+                } else if(rankId == 2) nextRankImage = 'rank_3_apex_swimmer.png';
                 else if(rankId == 3) nextRankImage = 'rank_4_abyss_guardian.png';
                 else nextRankImage = 'rank_5_ocean_sovereign.png';
 
@@ -448,7 +449,7 @@ class _HomePageState extends State<HomePage> {
                           fit: BoxFit.cover,
                           opacity: 0.75,
                           colorFilter: ColorFilter.mode(
-                            const Color.fromARGB(255, 75, 172, 251).withOpacity(0.5), 
+                            const Color.fromARGB(255, 75, 172, 251).withValues(alpha: 0.5), 
                             BlendMode.srcOver
                           ),
                         ),
@@ -460,14 +461,21 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               _currentBadgeUrl != null
                                   ? Container(
-                                      width: 80,
-                                      height: 80,
+                                      width: 75,
+                                      height: 75,
+                                      padding: EdgeInsets.all(7),
                                       decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: const Color.fromARGB(0, 255, 255, 255),
-                                        image: DecorationImage(
-                                          image: NetworkImage(_currentBadgeUrl!),
-                                          fit: BoxFit.cover,
+                                        color: Colors.white, 
+                                        borderRadius: BorderRadius.circular(100) 
+                                      ),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: const Color.fromARGB(0, 255, 255, 255),
+                                          image: DecorationImage(
+                                            image: NetworkImage(_currentBadgeUrl!),
+                                            fit: BoxFit.cover,
+                                          ),
                                         ),
                                       ),
                                     )
@@ -503,13 +511,26 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                     ),
-                                    Text(
-                                      _rankName,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Color.fromARGB(255, 255, 255, 255), 
+                                    Container(
+                                      padding: EdgeInsets.only(
+                                        top: 5, 
+                                        bottom: 5, 
+                                        left: 10, 
+                                        right: 10
                                       ),
-                                    ),
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(148, 215, 247, 1),
+                                        borderRadius: BorderRadius.circular(10)
+                                      ), 
+                                      child: Text(
+                                        '"$_rankName"',
+                                        style: TextStyle(
+                                          fontSize: 13, 
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.black 
+                                        ), textAlign: TextAlign.center,
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
@@ -541,7 +562,7 @@ class _HomePageState extends State<HomePage> {
                                         const Icon(Icons.sailing, color: Color.fromRGBO(10, 78, 236, 1), size: 40),
                                         const SizedBox(height: 4),
                                         Text('$_streak Hari', style: const TextStyle(fontSize: 22, fontFamily: 'Montserrat', fontWeight: FontWeight.w700)),
-                                        const Text('Berlayar Terus', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
+                                        const Text('Berlayar Terus', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
                                       ],
                                     ),
                                   ),
@@ -552,7 +573,7 @@ class _HomePageState extends State<HomePage> {
                                         const Icon(Icons.star, color: Color.fromRGBO(10, 78, 236, 1), size: 40),
                                         const SizedBox(height: 4),
                                         Text('$_points', style: const TextStyle(fontSize: 22, fontFamily: 'Montserrat', fontWeight: FontWeight.w700)),
-                                        const Text('Poin', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
+                                        const Text('Poin', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, color: Color.fromARGB(255, 120, 120, 120))),
                                       ],
                                     ),
                                   ),
@@ -780,12 +801,14 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
+                    const SizedBox(height: 20,), 
+
                     // ===== SECTION TUNGGU APA LAGI =====
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 14),
                       child: Text(
-                        "TUNGGU APA LAGI?!",
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        "Telusuri AquaVerse!",
+                        style: TextStyle(fontSize: 24, fontFamily: 'Montserrat', fontWeight: FontWeight.bold),
                       ),
                     ),
 
@@ -890,7 +913,7 @@ class _HomePageState extends State<HomePage> {
                         child: const Center(child: CircularProgressIndicator()),
                       ),
 
-                    const SizedBox(height: 40), // Spacer bawah
+                    const SizedBox(height: 30), // Spacer bawah
                   ],
                 ),
               ),

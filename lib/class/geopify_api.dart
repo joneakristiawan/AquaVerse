@@ -14,18 +14,11 @@ class LocationCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE3F2FD), 
-            Color(0xFF29B6F6), 
-          ],
-        ),
+        color: const Color.fromRGBO(217, 246, 252, 1),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -156,7 +149,7 @@ class LocationCard extends StatelessWidget {
               "Laut yang mengelilingi Pulau Jawa di utara, Samudra Hindia di selatan, Selat Sunda di barat, dan Selat Bali serta Madura di timur.",
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF455A64),
+                color: Colors.black,
                 height: 1.4,
               ),
             ),
@@ -171,7 +164,7 @@ class LocationCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onDiveNow,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 205, 239, 255), 
+                  backgroundColor: const Color.fromRGBO(148, 214, 245, 1),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -182,7 +175,7 @@ class LocationCard extends StatelessWidget {
                   "Selam Sekarang",
                   style: TextStyle(
                     fontSize: 20,
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: Colors.white, 
                     fontWeight: FontWeight.bold,
                     fontFamily: "Montserrat",
                   ),

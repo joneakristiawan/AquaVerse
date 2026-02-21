@@ -229,13 +229,15 @@ class _BiotaListPageState extends State<BiotaListPage> {
           .select(
             'id, nama, nama_latin, image_path, depth_meters, kategori_id, deskripsi, habitat, fakta_unik, status_konservasi, kategori(nama)',
           );
-      if (_selectedKategoriId != null)
+      if (_selectedKategoriId != null) {
         request = request.eq('kategori_id', _selectedKategoriId!);
+      }
       final trimmed = query.trim();
-      if (trimmed.isNotEmpty)
+      if (trimmed.isNotEmpty) {
         request = request.or(
           'nama.ilike.%$trimmed%,nama_latin.ilike.%$trimmed%',
         );
+      }
       final res = await request.order('depth_meters', ascending: true);
       if (!mounted) return;
       setState(() {

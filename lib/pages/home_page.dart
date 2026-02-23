@@ -435,7 +435,7 @@ class _HomePageState extends State<HomePage> {
                     // ===== SECTION BASE PROFILE =====
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(left: 24, right: 24, top: 60, bottom: 24),
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 50, bottom: 24),
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 255, 255, 255),
                         borderRadius: const BorderRadius.only(
@@ -461,11 +461,11 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               _currentBadgeUrl != null
                                   ? Container(
-                                      width: 75,
-                                      height: 75,
+                                      width: 90,
+                                      height: 90,
                                       padding: EdgeInsets.all(7),
                                       decoration: BoxDecoration(
-                                        color: Colors.white, 
+                                        color: const Color.fromARGB(0, 255, 255, 255), 
                                         borderRadius: BorderRadius.circular(100) 
                                       ),
                                       child: Container(
@@ -537,7 +537,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           Container(
                             padding: const EdgeInsets.symmetric(vertical: 20),
